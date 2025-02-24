@@ -1,0 +1,75 @@
+read program, division, vs0;
+init:
+    := residual ' ;
+    := program parse program vs0;
+    := pp0 lookupInitial program;
+    := pending '((pp0$vs0));
+    := marked '();
+    if == pending '() goto stop_external else cont_external;
+cont_external:
+    := tmp hd pending;
+    := pp hd tmp;
+    := vs hd tl tmp;
+    := marked inplaceCons '(pp$vs);
+    := code initialCode pp vs;
+    := pending inplaceTl;
+    goto start_lookup;
+start_lookup:
+    := ppi pp0;
+    := bb lookup pp0 program;
+    if == ppi pp goto after_lookup else continue_lookup;
+continue_lookup:
+    := ppi nextLabel ppi program;
+    := bb lookup ppi program;
+    if == ppi pp goto after_lookup else continue_lookup;
+after_lookup:
+    goto cont_internal;
+cont_internal:
+    := command firstCommand bb;
+    := bb tl bb;
+    := op hd command;
+    := command tl command;
+    if == op ':= goto do_assignment else cont1;
+do_assignment:
+    := X hd command;
+    := exp hd tl command;
+    if isStatic division X goto do_assignment_static else do_assignment_dynamic;
+do_assignment_static:
+    := vs addToState vs X eval exp vs;
+    if isEmpty bb goto stop_internal else cont_internal;
+do_assignment_dynamic:
+    := code extendAssignment code X reduce exp vs;
+    if isEmpty bb goto stop_internal else cont_internal;
+do_goto:
+    := bb lookup hd command program;
+    if isEmpty bb goto stop_internal else cont_internal;
+do_if:
+    := exp hd command;
+    := trueLabel hd tl tl command;
+    := falseLabel hd tl tl tl tl command;
+    if isStatic division exp goto do_if_static else do_if_dynamic;
+do_if_static:
+    := bb lookup ternaryOperator eval exp vs trueLabel falseLabel  program;
+    if isEmpty bb goto stop_internal else cont_internal;
+do_if_dynamic:
+    := pending inplaceConsUniqueIfNotIn '(trueLabel$vs) marked;
+    := pending inplaceConsUniqueIfNotIn '(falseLabel$vs) marked;
+    := code extendIf code reduce exp vs trueLabel falseLabel vs;
+    if isEmpty bb goto stop_internal else cont_internal;
+do_return:
+    := exp hd command;
+    := code extendReturn code reduce exp vs;
+    if isEmpty bb goto stop_internal else cont_internal;
+cont1:
+    if == op 'goto goto do_goto else cont2;
+cont2:
+    if == op 'if goto do_if else cont3;
+cont3:
+    if == op 'return goto do_return else fail;
+fail:
+    return 'fail;
+stop_internal:
+    := residual extendCode residual code;
+    if == pending '() goto stop_external else cont_external;
+stop_external:
+    return residual;

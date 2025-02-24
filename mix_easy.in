@@ -1,0 +1,4 @@
+/Users/Timur.Kudashev/CLionProjects/FlowchartFutamura/mix.flowchart
+read name, namelist, valuelist; search: if == name hd namelist goto found else cont; cont: := valuelist tl valuelist; := namelist tl namelist; goto search; found: return hd valuelist;
+(name$namelist)
+[name$z$namelist$(x$y$z)]

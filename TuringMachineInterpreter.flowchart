@@ -1,0 +1,47 @@
+read Q, Right;
+init:
+    := Qtail Q;
+    := Left '();
+    goto loop;
+loop:
+    if == Qtail '{} goto stop else cont;
+cont:
+    := Instruction firstInstruction Qtail;
+    := Qtail rest Qtail;
+    := Operator hd Instruction;
+    if == Operator 'right goto do-right else cont1;
+cont1:
+    if == Operator 'left goto do-left else cont2;
+cont2:
+    if == Operator 'write goto do-write else cont3;
+cont3:
+    if == Operator 'goto goto do-goto else cont4;
+cont4:
+    if == Operator 'if goto do-if else error;
+do-right:
+    := Left cons firstSym Right Left;
+    := Right tl Right;
+    goto loop;
+do-left:
+    := Right cons firstSym Left Right;
+    := Left tl Left;
+    goto loop;
+do-write:
+    := Symbol hd tl Instruction;
+    := Right cons Symbol tl Right;
+    goto loop;
+do-goto:
+    := Nextlabel hd tl Instruction;
+    := Qtail newTail Nextlabel Q;
+    goto loop;
+do-if:
+    := Symbol hd tl Instruction;
+    := Nextlabel hd tl tl tl Instruction;
+    if == Symbol firstSym Right goto jump else loop;
+jump:
+    := Qtail newTail Nextlabel Q;
+    goto loop;
+error:
+    return 'fail;
+stop:
+    return Right;
