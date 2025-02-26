@@ -194,12 +194,11 @@ map<string, int> Util::functions = {
     {"lookupInitial", 1}, {"isEmpty", 1},
 
     {"hasNext", 2}, {"==", 2}, {"cons", 2}, {"newTail", 2}, {"initialCode", 2}, {"eval", 2}, {"reduce", 2},
-    {"isStatic", 2},
-    {"lookup", 2}, {"in", 2}, {"extendReturn", 2}, {"extendCode", 2}, {"nextLabel", 2},
+    {"isStatic", 2}, {"consUnique", 2}, {"lookup", 2}, {"in", 2}, {"extendReturn", 2}, {"extendCode", 2},
     {"getLabel", 2}, {"parse", 2}, {"extendGoto", 2},
 
     {"addToState", 3}, {"extendAssignment", 3}, {"consUniqueIfNotIn", 3}, {"ternaryOperator", 3},
-    {"lookupStaticBounded", 3},
+    {"lookupStaticBounded", 3}, {"nextLabel", 3},
 
     {"extendIf", 5}
 };
@@ -208,6 +207,9 @@ string value_to_string(optional<FlowchartValue> value);
 
 template<typename T>
 T *as(FlowchartValue &value);
+
+template<typename T>
+const T *const_as(const FlowchartValue &value);
 
 optional<string> boolean_to_optional_string(const bool value) {
     return value ? optional("true") : optional("false");
@@ -720,13 +722,20 @@ public:
         return labels[index];
     }
 
-    string next_label(const string &label) {
+    string next_label(const string &label, const FlowchartList &pendingLabels) {
         if (enableLogging) cout << "FlowchartProgram.next_label: Start: " << current_time() << endl;
         auto index = ranges::find(labels, label) - labels.begin() + 1;
-        if (index == labels.size()) index--;
-        const auto result = labels[index];
+        while (index < labels.size()) {
+            for (const auto &pendingLabel : pendingLabels.values) {
+                if (*const_as<string>(pendingLabel.value()) == labels[index]) {
+                    if (enableLogging) cout << "FlowchartProgram.next_label: End: " << current_time() << endl;
+                    return labels[index];
+                }
+            }
+            index++;
+        }
         if (enableLogging) cout << "FlowchartProgram.next_label: End: " << current_time() << endl;
-        return result;
+        return labels.back();
     }
 
     [[nodiscard]] std::string to_string() const {
@@ -1390,7 +1399,8 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             }
         } else if (op == "nextLabel") {
             auto *program = as<FlowchartProgram>(variables[args[1]].value());
-            auto result = make_pair(true, program->next_label(value_to_string(variables[args[0]])));
+            auto *pendingLabels = as<FlowchartList>(variables[args[2]].value());
+            auto result = make_pair(true, program->next_label(value_to_string(variables[args[0]]), *pendingLabels));
             if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
                                endl;
             return result;
@@ -1433,6 +1443,32 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             if (variables[args[2]].has_value()) {
                 auto *list2 = as<FlowchartList>(variables[args[2]].value());
                 for (auto &v: list2->values) {
+                    if (equal_values(v, variables[args[0]])) {
+                        auto result = make_pair(true, variables[args[1]]);
+                        if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
+                                           current_time() << endl;
+                        return result;
+                    }
+                }
+            }
+            if (auto *stmt = as<Statement>(variables[args[1]].value())) {
+                stmt->cons(value_to_string(variables[args[0]]));
+                auto result = make_pair(true, optional(*stmt));
+                if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
+                                   endl;
+                return result;
+            }
+            if (auto *list = as<FlowchartList>(variables[args[1]].value())) {
+                list->cons(variables[args[0]]);
+                auto result = make_pair(true, optional(*list));
+                if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
+                                   endl;
+                return result;
+            }
+        } else if (op == "consUnique") {
+            if (variables[args[1]].has_value()) {
+                auto *list = as<FlowchartList>(variables[args[1]].value());
+                for (auto &v: list->values) {
                     if (equal_values(v, variables[args[0]])) {
                         auto result = make_pair(true, variables[args[1]]);
                         if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<

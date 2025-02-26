@@ -3,6 +3,7 @@ init:
     := residual ' ;
     := program parse program vs0;
     := pp0 lookupInitial program;
+    := pendingLabels '();
     := pending '((pp0$vs0));
     := marked '();
     goto cont_external;
@@ -20,7 +21,7 @@ cont_external:
     := tmpDynamic == ppi pp;
     if tmpDynamic goto cont_internal else continue_lookup;
 continue_lookup:
-    := ppi nextLabel ppi program;
+    := ppi nextLabel ppi program pendingLabels;
     := bb lookup ppi program;
     := tmpDynamic == ppi pp;
     if tmpDynamic goto cont_internal else continue_lookup;
@@ -76,8 +77,10 @@ do_if_static_false:
     if tmpStatic goto stop_internal else cont_internal;
 do_if_dynamic:
     := tmpDynamic '(trueLabel$vs);
+    := pendingLabels consUnique trueLabel pendingLabels;
     := pending consUniqueIfNotIn tmpDynamic pending marked;
     := tmpDynamic '(falseLabel$vs);
+    := pendingLabels consUnique falseLabel pendingLabels;
     := pending consUniqueIfNotIn tmpDynamic pending marked;
     := tmpDynamic reduce exp vs;
     := code extendIf code tmpDynamic trueLabel falseLabel vs;
