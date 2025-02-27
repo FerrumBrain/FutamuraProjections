@@ -1101,7 +1101,9 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                 success = false;
                 reduced += arg;
             } else {
-                reduced += "'" + value_to_string(variables[arg]);
+                string str = value_to_string(variables[arg]);
+                if (str[0] != '\'') reduced += '\'';
+                reduced +=  str;
             }
         }
         if (!success) {
