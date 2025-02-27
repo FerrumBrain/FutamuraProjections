@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <numeric>
 #include <regex>
 #include <vector>
@@ -185,9 +186,9 @@ struct Util {
     }
 };
 
-vector<char> Util::open_parenthesis = {'(', '[', '{'};
+vector<char> Util::open_parenthesis = {'(', '[', '{', '<'};
 
-vector<char> Util::closed_parenthesis = {')', ']', '}'};
+vector<char> Util::closed_parenthesis = {')', ']', '}', '>'};
 
 map<string, int> Util::functions = {
     {"hd", 1}, {"tl", 1}, {"firstInstruction", 1}, {"firstSym", 1}, {"firstCommand", 1}, {"rest", 1},
@@ -197,10 +198,11 @@ map<string, int> Util::functions = {
     {"isStatic", 2}, {"consUnique", 2}, {"lookup", 2}, {"in", 2}, {"extendReturn", 2}, {"extendCode", 2},
     {"getLabel", 2}, {"parse", 2}, {"extendGoto", 2},
 
-    {"addToState", 3}, {"extendAssignment", 3}, {"consUniqueIfNotIn", 3}, {"ternaryOperator", 3},
-    {"lookupStaticBounded", 3}, {"nextLabel", 3},
+    {"addToState", 3}, {"extendAssignment", 3}, {"ternaryOperator", 3}, {"nextLabel", 3},
 
-    {"extendIf", 5}
+    {"consUniqueIfNotInWithStateCompression", 4},
+
+    {"extendIf", 5},
 };
 
 string value_to_string(optional<FlowchartValue> value);
@@ -323,7 +325,7 @@ public:
             this->dictionary = dictionary;
             this->order = order;
         } else {
-            if (keys_values != "{}") {
+            if (keys_values != "<>") {
                 for (const vector<string> keys_values_split = Util::split_on_level(
                          keys_values.substr(1, keys_values.size() - 2), '$',
                          0); const auto &key_value: keys_values_split) {
@@ -338,7 +340,7 @@ public:
     }
 
     static bool is_correct_string(const std::string &str) {
-        return !str.empty() && str.front() == '{' && str.back() == '}';
+        return !str.empty() && str.front() == '<' && str.back() == '>';
     }
 
     [[nodiscard]] bool is_empty() const {
@@ -355,12 +357,12 @@ public:
     [[nodiscard]] std::string to_string() {
         if (enableLogging) cout << "TuringMachineProgram.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
-        oss << "{";
+        oss << "<";
         for (size_t i = 0; i < order.size(); ++i) {
             if (i > 0) oss << " $ ";
             oss << order[i] << ": " << dictionary[order[i]].to_string();
         }
-        oss << "}";
+        oss << ">";
         if (enableLogging) cout << "TuringMachineProgram.to_string: End: " << current_time() << endl;
         return oss.str();
     }
@@ -411,9 +413,9 @@ public:
     [[nodiscard]] std::string to_string() const {
         if (enableLogging) cout << "FlowchartBlock.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
-        oss << label << ":\n";
+        oss << label << ": ";
         for (auto &line: contents) {
-            oss << "    " << line.to_string() << ";\n";
+            oss << line.to_string() << "; ";
         }
         if (enableLogging) cout << "FlowchartBlock.to_string: End: " << current_time() << endl;
         return oss.str();
@@ -453,6 +455,8 @@ public:
     optional<FlowchartValue> evaluate(const string &expr);
 
     optional<FlowchartValue> reduce(const string &expr);
+
+    [[nodiscard]] FlowchartProgramState compress(const string &label, const FlowchartProgram &program) const;
 
     static vector<string> split_to_expr(const vector<string> &tokens, int expr_number) {
         if (enableLogging) cout << "FlowchartProgramState.split_to_expr: Start: " << current_time() << endl;
@@ -520,6 +524,7 @@ class FlowchartProgram {
 public:
     vector<string> labels;
     FlowchartProgramState state;
+    map<string, set<string>> used_variables;
 
     FlowchartProgram(const optional<FlowchartProgramState> &parent_state, const bool is_reduce, const string &program,
                      const string &filename): state(parent_state, is_reduce, "") {
@@ -545,7 +550,11 @@ public:
         if (enableLogging) cout << "FlowchartProgram: End: " << current_time() << endl;
     }
 
-    static bool is_correct_string(const string &str) {
+    static bool is_correct_string(const string &s) {
+        if (s[0] != '{' || s[s.size() - 1] != '}') {
+            return false;
+        }
+        const string str = Util::strip_spaces(s.substr(1, s.size() - 2));
         if (enableLogging) cout << "FlowchartProgram.is_correct_string: Start: " << current_time() << endl;
         auto lines = vector<string>{};
         for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(str), ';', 0)) {
@@ -594,7 +603,7 @@ public:
     FlowchartProgram parse_program(const bool read_from_input, const optional<FlowchartProgramState> &state) {
         if (enableLogging) cout << "FlowchartProgram.parse_program: Start: " << current_time() << endl;
         auto lines = vector<string>{};
-        for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(program), ';', 0)) {
+        for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(Util::strip_spaces(program.substr(1, program.size() - 2))), ';', 0)) {
             auto line = Util::strip_spaces(raw_line);
             if (line.empty()) continue;
             lines.emplace_back(line);
@@ -631,6 +640,8 @@ public:
 
             result.labels.emplace_back(label);
             result.blocks[label] = FlowchartBlock(label, {});
+            result.used_variables[label] = {};
+            set<string> rewrote = {};
             while (!Util::is_correct_jump(line)) {
                 if (line.rfind(" parse ") != string::npos) {
                     auto args = Util::split_on_level(Util::strip_spaces(line), ' ', 0);
@@ -650,55 +661,37 @@ public:
                             parsed_program_arg))
                         as<FlowchartProgramState>(result.state.variables[vs_arg].value())->variables[parsed_program_arg]
                                 = result.state.variables[parsed_program_arg];
-                } else if (line.rfind(" lookupStaticBounded ") != string::npos) {
-                    result.lookup_id++;
-                    auto line_without_spaces = line;
-                    ranges::replace(line_without_spaces, ' ', '_');
-                    ranges::replace(line_without_spaces, '\n', '_');
-                    ranges::replace(line_without_spaces, '\t', '_');
-                    ranges::replace(line_without_spaces, ':', '|');
-                    ranges::replace(line_without_spaces, ';', '|');
-                    const string &after_lookup_label =
-                            "after_" + std::to_string(result.lookup_id) + "_" + line_without_spaces;
-                    const string &start_lookup_label =
-                            "start_" + std::to_string(result.lookup_id) + "_" + line_without_spaces;
-                    const string &continue_lookup_label =
-                            "continue_" + std::to_string(result.lookup_id) + "_" + line_without_spaces;
-                    auto args = Util::split_on_level(Util::strip_spaces(line), ' ', 0);
-                    const auto &bb_arg = args[1];
-                    const auto &pp_arg = args[3];
-                    const auto &program_arg = args[4];
-                    const auto &ppi_arg = args[5];
-                    result.blocks[label].add_line("goto " + start_lookup_label + ";");
-
-                    result.labels.emplace_back(start_lookup_label);
-                    result.blocks[start_lookup_label] = FlowchartBlock(start_lookup_label, {});
-                    result.blocks[start_lookup_label].add_line(":= " + ppi_arg + " lookupInitial " + program_arg + ";");
-                    result.blocks[start_lookup_label].add_line(
-                        ":= " + bb_arg + " lookup " + ppi_arg + " " + program_arg + ";");
-                    result.blocks[start_lookup_label].add_line(
-                        "if == " + ppi_arg + " " + pp_arg + " goto " + after_lookup_label + " else " +
-                        continue_lookup_label + ";");
-
-                    result.labels.emplace_back(continue_lookup_label);
-                    result.blocks[continue_lookup_label] = FlowchartBlock(continue_lookup_label, {});
-                    result.blocks[continue_lookup_label].add_line(
-                        ":= " + ppi_arg + " nextLabel " + ppi_arg + " " + program_arg + ";");
-                    result.blocks[continue_lookup_label].add_line(
-                        ":= " + bb_arg + " lookup " + ppi_arg + " " + program_arg + ";");
-                    result.blocks[continue_lookup_label].add_line(
-                        "if == " + ppi_arg + " " + pp_arg + " goto " + after_lookup_label + " else " +
-                        continue_lookup_label + ";");
-
-                    result.labels.emplace_back(after_lookup_label);
-                    result.blocks[after_lookup_label] = FlowchartBlock(after_lookup_label, {});
-                    label = after_lookup_label;
                 } else {
                     result.blocks[label].add_line(line);
                 }
 
+                auto cmd_tokens = Util::split_on_level(line, ' ', 0);
+                for (int o = 2; o < cmd_tokens.size(); o++) {
+                    if (Util::functions.contains(cmd_tokens[o])) continue;
+                    if (cmd_tokens[o][0] == '\'') continue;
+                    if (rewrote.contains(cmd_tokens[o])) continue;
+                    result.used_variables[label].insert(cmd_tokens[o]);
+                }
+                rewrote.insert(cmd_tokens[1]);
+
                 i++;
                 line = lines[i];
+            }
+            auto cmd_tokens = Util::split_on_level(line, ' ', 0);
+            if (cmd_tokens[0] == "return") {
+                for (int o = 1; o < cmd_tokens.size(); o++) {
+                    if (Util::functions.contains(cmd_tokens[o])) continue;
+                    if (cmd_tokens[o][0] == '\'') continue;
+                    if (rewrote.contains(cmd_tokens[o])) continue;
+                    result.used_variables[label].insert(cmd_tokens[o]);
+                }
+            } else if (cmd_tokens[0] == "if") {
+                for (int o = 1; o < cmd_tokens.size() - 4; o++) {
+                    if (Util::functions.contains(cmd_tokens[o])) continue;
+                    if (cmd_tokens[o][0] == '\'') continue;
+                    if (rewrote.contains(cmd_tokens[o])) continue;
+                    result.used_variables[label].insert(cmd_tokens[o]);
+                }
             }
             result.blocks[label].add_line(line);
             i++;
@@ -725,25 +718,19 @@ public:
     string next_label(const string &label, const FlowchartList &pendingLabels) {
         if (enableLogging) cout << "FlowchartProgram.next_label: Start: " << current_time() << endl;
         auto index = ranges::find(labels, label) - labels.begin() + 1;
-        while (index < labels.size()) {
-            for (const auto &pendingLabel : pendingLabels.values) {
-                if (*const_as<string>(pendingLabel.value()) == labels[index]) {
-                    if (enableLogging) cout << "FlowchartProgram.next_label: End: " << current_time() << endl;
-                    return labels[index];
-                }
-            }
-            index++;
-        }
         if (enableLogging) cout << "FlowchartProgram.next_label: End: " << current_time() << endl;
-        return labels.back();
+        if (index < labels.size()) return labels[index];
+        return "should_be_unreachable";
     }
 
     [[nodiscard]] std::string to_string() const {
         if (enableLogging) cout << "FlowchartProgram.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
+        oss << "<";
         for (const auto &label: labels) {
-            oss << blocks.at(label).to_string() << "\n";
+            oss << blocks.at(label).to_string() << " ";
         }
+        oss << ">";
         if (enableLogging) cout << "FlowchartProgram.to_string: End: " << current_time() << endl;
         return oss.str();
     }
@@ -921,29 +908,29 @@ bool equal_values(const optional<FlowchartValue> &a, const optional<FlowchartVal
         if (auto *stmt2 = const_as<Statement>(b.value())) {
             result = *stmt1 == *stmt2;
         } else result = false;
-    } else if (auto *stmt1 = const_as<TuringMachineProgram>(a.value())) {
-        if (auto *stmt2 = const_as<TuringMachineProgram>(b.value())) {
-            result = *stmt1 == *stmt2;
+    } else if (auto *tm_program1 = const_as<TuringMachineProgram>(a.value())) {
+        if (auto *tm_program2 = const_as<TuringMachineProgram>(b.value())) {
+            result = *tm_program1 == *tm_program2;
         } else result = false;
-    } else if (auto *stmt1 = const_as<string>(a.value())) {
-        if (auto *stmt2 = const_as<string>(b.value())) {
-            result = *stmt1 == *stmt2;
+    } else if (auto *str1 = const_as<string>(a.value())) {
+        if (auto *str2 = const_as<string>(b.value())) {
+            result = *str1 == *str2;
         } else result = false;
-    } else if (auto *stmt1 = const_as<FlowchartBlock>(a.value())) {
-        if (auto *stmt2 = const_as<FlowchartBlock>(b.value())) {
-            result = *stmt1 == *stmt2;
+    } else if (auto *block1 = const_as<FlowchartBlock>(a.value())) {
+        if (auto *block2 = const_as<FlowchartBlock>(b.value())) {
+            result = *block1 == *block2;
         } else result = false;
-    } else if (auto *stmt1 = const_as<FlowchartProgramState>(a.value())) {
-        if (auto *stmt2 = const_as<FlowchartProgramState>(b.value())) {
-            result = *stmt1 == *stmt2;
+    } else if (auto *state1 = const_as<FlowchartProgramState>(a.value())) {
+        if (auto *state2 = const_as<FlowchartProgramState>(b.value())) {
+            result = *state1 == *state2;
         } else result = false;
-    } else if (auto *stmt1 = const_as<FlowchartProgram>(a.value())) {
-        if (auto *stmt2 = const_as<FlowchartProgram>(b.value())) {
-            result = stmt1->to_string() == stmt2->to_string();
+    } else if (auto *program1 = const_as<FlowchartProgram>(a.value())) {
+        if (auto *program2 = const_as<FlowchartProgram>(b.value())) {
+            result = program1->to_string() == program2->to_string();
         } else result = false;
-    } else if (auto *stmt1 = const_as<FlowchartList>(a.value())) {
-        if (auto *stmt2 = const_as<FlowchartList>(b.value())) {
-            result = *stmt1 == *stmt2;
+    } else if (auto *list1 = const_as<FlowchartList>(a.value())) {
+        if (auto *list2 = const_as<FlowchartList>(b.value())) {
+            result = *list1 == *list2;
         } else result = false;
     } else {
         throw runtime_error("FlowchartList::equal_values() failed");
@@ -1047,6 +1034,28 @@ bool FlowchartList::operator==(const FlowchartList &other) const {
     return true;
 }
 
+FlowchartProgramState FlowchartProgramState::compress(const string &label, const FlowchartProgram &program) const {
+    auto result = FlowchartProgramState(nullopt, false, "");
+    for (const auto& var: program.used_variables.at(label)) {
+        if (!variables.contains(var)) result.append(var, nullopt);
+        else result.append(var, variables.at(var));
+    }
+    return result;
+}
+
+
+bool equal_label_state(const FlowchartList& a, const FlowchartList& b, const FlowchartProgram& program) {
+    auto a_label = *const_as<string>(a.values[1].value());
+    auto b_label = *const_as<string>(b.values[1].value());
+
+    if (a_label != b_label) return false;
+
+    auto a_state = const_as<FlowchartProgramState>(a.values[0].value())->compress(a_label, program);
+    auto b_state = const_as<FlowchartProgramState>(b.values[0].value())->compress(b_label, program);
+
+    return a_state == b_state;
+}
+
 [[nodiscard]] std::string FlowchartList::to_string() const {
     std::ostringstream oss;
     oss << "(";
@@ -1102,7 +1111,8 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                 reduced += arg;
             } else {
                 string str = value_to_string(variables[arg]);
-                if (str[0] != '\'') reduced += '\'';
+                if (str[0] != '\'')
+                    reduced += "'";
                 reduced +=  str;
             }
         }
@@ -1430,11 +1440,11 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
                                endl;
             return result;
-        } else if (op == "consUniqueIfNotIn") {
+        } else if (op == "consUniqueIfNotInWithStateCompression") {
             if (variables[args[1]].has_value()) {
                 auto *list = as<FlowchartList>(variables[args[1]].value());
                 for (auto &v: list->values) {
-                    if (equal_values(v, variables[args[0]])) {
+                    if (equal_label_state(*const_as<FlowchartList>(v.value()), *const_as<FlowchartList>(variables[args[0]].value()), *const_as<FlowchartProgram>(variables[args[3]].value()))) {
                         auto result = make_pair(true, variables[args[1]]);
                         if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
                                            current_time() << endl;
@@ -1445,7 +1455,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             if (variables[args[2]].has_value()) {
                 auto *list2 = as<FlowchartList>(variables[args[2]].value());
                 for (auto &v: list2->values) {
-                    if (equal_values(v, variables[args[0]])) {
+                    if (equal_label_state(*const_as<FlowchartList>(v.value()), *const_as<FlowchartList>(variables[args[0]].value()), *const_as<FlowchartProgram>(variables[args[3]].value()))) {
                         auto result = make_pair(true, variables[args[1]]);
                         if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
                                            current_time() << endl;

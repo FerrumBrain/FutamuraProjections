@@ -1,8 +1,9 @@
+{
 read Q, Right;
 init:
     := Qtail Q;
     := Left '();
-    := emptyProgram '{};
+    := emptyProgram '<>;
     := rightCommand 'right;
     := leftCommand 'left;
     := writeCommand 'write;
@@ -69,3 +70,4 @@ error:
     return fail;
 stop:
     return Right;
+}

@@ -1,3 +1,4 @@
+{
 read program, division, vs0;
 init:
     := residual ' ;
@@ -78,10 +79,10 @@ do_if_static_false:
 do_if_dynamic:
     := tmpDynamic '(trueLabel$vs);
     := pendingLabels consUnique trueLabel pendingLabels;
-    := pending consUniqueIfNotIn tmpDynamic pending marked;
+    := pending consUniqueIfNotInWithStateCompression tmpDynamic pending marked program;
     := tmpDynamic '(falseLabel$vs);
     := pendingLabels consUnique falseLabel pendingLabels;
-    := pending consUniqueIfNotIn tmpDynamic pending marked;
+    := pending consUniqueIfNotInWithStateCompression tmpDynamic pending marked program;
     := tmpDynamic reduce exp vs;
     := code extendIf code tmpDynamic trueLabel falseLabel vs;
     := tmpStatic isEmpty bb;
@@ -113,3 +114,4 @@ stop_internal:
     if tmpDynamic goto stop_external else cont_external;
 stop_external:
     return residual;
+}
