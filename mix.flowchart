@@ -1,7 +1,7 @@
 {
 read program, division, vs0;
 init:
-    := residual ' ;
+    := residual '{};
     := program parse program vs0;
     := pp0 lookupInitial program;
     := pendingLabels '();
@@ -15,7 +15,7 @@ cont_external:
     := vs hd tmpDynamic;
     := tmpDynamic '(pp$vs);
     := marked cons tmpDynamic marked;
-    := code initialCode pp vs;
+    := code initialCode pp vs program;
     := pending tl pending;
     := ppi pp0;
     := bb lookup pp0 program;
@@ -84,7 +84,7 @@ do_if_dynamic:
     := pendingLabels consUnique falseLabel pendingLabels;
     := pending consUniqueIfNotInWithStateCompression tmpDynamic pending marked program;
     := tmpDynamic reduce exp vs;
-    := code extendIf code tmpDynamic trueLabel falseLabel vs;
+    := code extendIf code tmpDynamic trueLabel falseLabel vs program;
     := tmpStatic isEmpty bb;
     if tmpStatic goto stop_internal else cont_internal;
 do_return:
