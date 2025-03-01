@@ -28,7 +28,6 @@ using FlowchartValue = std::variant<
     FlowchartProgramState
 >;
 
-ifstream inputfs("/Users/Timur.Kudashev/CLionProjects/FlowchartFutamura/mix_mix.in");
 bool enableLogging = false;
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
@@ -634,7 +633,7 @@ public:
         return true;
     }
 
-    FlowchartProgram parse_program(const bool read_from_input, const optional<FlowchartProgramState> &state) {
+    FlowchartProgram parse_program(const bool read_from_input, const optional<FlowchartProgramState> &state, ifstream &ifs) {
         if (enableLogging) cout << "FlowchartProgram.parse_program: Start: " << current_time() << endl;
         auto lines = vector<string>{};
         for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(Util::strip_spaces(program.substr(1, program.size() - 2))), ';', 0)) {
@@ -649,7 +648,7 @@ public:
                 string key = Util::strip_spaces(token);
                 if (read_from_input) {
                     std::string input;
-                    getline(inputfs, input);
+                    getline(ifs, input);
                     result.state.variables[key] = value_from_raw(input, nullopt, false);
                 } else {
                     if (state.has_value() && state.value().variables.contains(key)) {
@@ -684,12 +683,12 @@ public:
                     const string &vs_arg = args[4];
                     if (result.state.variables.contains(vs_arg)) {
                         if (!result.state.variables[vs_arg].has_value())
-                            result.state.variables[parsed_program_arg] = program_arg->parse_program(false, nullopt);
+                            result.state.variables[parsed_program_arg] = program_arg->parse_program(false, nullopt, ifs);
                         else
                             result.state.variables[parsed_program_arg] = program_arg->parse_program(
-                                false, *as<FlowchartProgramState>(result.state.variables[vs_arg].value()));
+                                false, *as<FlowchartProgramState>(result.state.variables[vs_arg].value()), ifs);
                     } else
-                        result.state.variables[parsed_program_arg] = program_arg->parse_program(false, nullopt);
+                        result.state.variables[parsed_program_arg] = program_arg->parse_program(false, nullopt, ifs);
                     if (result.state.variables.contains(vs_arg) && result.state.variables[vs_arg].has_value() && as<
                             FlowchartProgramState>(result.state.variables[vs_arg].value())->variables.contains(
                             parsed_program_arg))
@@ -946,19 +945,19 @@ class FlowchartInterpreter {
         }
     }
 
-    FlowchartInterpreter(const std::string &program_data, const std::string &filename)
+    FlowchartInterpreter(const std::string &program_data, const std::string &filename, ifstream &ifs)
         : program(nullopt, false, program_data, filename) {
-        program = program.parse_program(true, nullopt);
+        program = program.parse_program(true, nullopt, ifs);
     }
 
 public:
-    static void run_from_file(const std::string &filename) {
-        FlowchartInterpreter interpreter("", filename);
+    static void run_from_file(const std::string &filename, ifstream &ifs) {
+        FlowchartInterpreter interpreter("", filename, ifs);
         interpreter.run();
     }
 
-    static void run_from_program(const std::string &program) {
-        FlowchartInterpreter interpreter(program, "");
+    static void run_from_program(const std::string &program, ifstream &ifs) {
+        FlowchartInterpreter interpreter(program, "", ifs);
         interpreter.run();
     }
 };
@@ -1601,7 +1600,13 @@ string FlowchartProgramState::to_string() {
 }
 
 int main() {
+    string input;
+    cout << "Enter input file: ";
+    cin >> input;
+
+    ifstream ifs(input);
+
     string file;
-    getline(inputfs, file);
-    FlowchartInterpreter::run_from_file(file);
+    getline(ifs, file);
+    FlowchartInterpreter::run_from_file(file, ifs);
 }
