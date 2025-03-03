@@ -1,117 +1,81 @@
 {
 read program, division, vs0;
-init:
-    := residual '{};
+#init!:
+    := residual {};
     := program parse program vs0;
+    := used usedVars program;
     := pp0 lookupInitial program;
-    := pendingLabels '();
-    := pending '((pp0$vs0));
-    := marked '();
-    goto cont_external;
-cont_external:
-    := tmpDynamic hd pending;
-    := pp hd tmpDynamic;
-    := tmpDynamic tl tmpDynamic;
-    := vs hd tmpDynamic;
-    := tmpDynamic '(pp$vs);
-    := marked cons tmpDynamic marked;
-    := code initialCode pp vs program;
+    := pendingLabels ();
+    := pending ((pp0$vs0));
+    := marked ();
+    goto #cont_external!;
+#cont_external!:
+    := pp hd hd pending;
+    := vs hd tl hd pending;
+    := marked cons (pp $ vs) marked;
+    := code initialCode pp vs used;
     := pending tl pending;
     := ppi pp0;
     := bb lookup pp0 program;
-    := tmpDynamic == ppi pp;
-    if tmpDynamic goto cont_internal else continue_lookup;
-continue_lookup:
+    if == ppi pp goto #cont_internal! else #continue_lookup!;
+#continue_lookup!:
     := ppi nextLabel ppi program pendingLabels;
     := bb lookup ppi program;
-    := tmpDynamic == ppi pp;
-    if tmpDynamic goto cont_internal else continue_lookup;
-cont_internal:
+    if == ppi pp goto #cont_internal! else #continue_lookup!;
+#cont_internal!:
     := command firstCommand bb;
     := bb tl bb;
     := op hd command;
     := command tl command;
-    := eqSymbol ':=;
-    := tmpStatic == op eqSymbol;
-    if tmpStatic goto do_assignment else cont1;
-do_assignment:
+    if == op %:=/ goto #do_assignment! else #cont1!;
+#do_assignment!:
     := X hd command;
-    := tmpStatic tl command;
-    := exp hd tmpStatic;
-    := tmpStatic isStatic division X;
-    if tmpStatic goto do_assignment_static else do_assignment_dynamic;
-do_assignment_static:
-    := tmpDynamic eval exp vs;
-    := vs addToState vs X tmpDynamic;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-do_assignment_dynamic:
-    := tmpDynamic reduce exp vs;
-    := code extendAssignment code X tmpDynamic;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-do_goto:
-    := tmpStatic hd command;
-    := bb lookup tmpStatic program;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-do_if:
+    := exp hd tl command;
+    if isStatic division X goto #do_assignment_static! else #do_assignment_dynamic!;
+#do_assignment_static!:
+    := vs addToState vs X eval exp vs;
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#do_assignment_dynamic!:
+    := code extendAssignment code X reduce exp vs;
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#do_goto!:
+    := bb lookup hd command program;
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#do_if!:
     := exp hd command;
-    := tmpStatic tl command;
-    := tmpStatic tl tmpStatic;
-    := trueLabel hd tmpStatic;
-    := tmpStatic tl tmpStatic;
-    := tmpStatic tl tmpStatic;
-    := falseLabel hd tmpStatic;
-    := tmpStatic isStatic division exp;
-    if tmpStatic goto do_if_static else do_if_dynamic;
-do_if_static:
-    := tmpDynamic eval exp vs;
-    if tmpDynamic goto do_if_static_true else do_if_static_false;
-do_if_static_true:
+    := trueLabel hd tl tl command;
+    := falseLabel hd tl tl tl tl command;
+    if isStatic division exp goto #do_if_static! else #do_if_dynamic!;
+#do_if_static!:
+    if eval exp vs goto #do_if_static_true! else #do_if_static_false!;
+#do_if_static_true!:
     := bb lookup trueLabel program;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-do_if_static_false:
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#do_if_static_false!:
     := bb lookup falseLabel program;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-do_if_dynamic:
-    := tmpDynamic '(trueLabel$vs);
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#do_if_dynamic!:
     := pendingLabels consUnique trueLabel pendingLabels;
-    := pending consUniqueIfNotInWithStateCompression tmpDynamic pending marked program;
-    := tmpDynamic '(falseLabel$vs);
+    := pending consUniqueIfNotInWithStateCompression (trueLabel$vs) pending marked used;
     := pendingLabels consUnique falseLabel pendingLabels;
-    := pending consUniqueIfNotInWithStateCompression tmpDynamic pending marked program;
-    := tmpDynamic reduce exp vs;
-    := code extendIf code tmpDynamic trueLabel falseLabel vs program;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-do_return:
+    := pending consUniqueIfNotInWithStateCompression (falseLabel$vs) pending marked used;
+    := code extendIf code reduce exp vs trueLabel falseLabel vs used;
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#do_return!:
     := exp hd command;
-    := tmpDynamic reduce exp vs;
-    := code extendReturn code tmpDynamic;
-    := tmpStatic isEmpty bb;
-    if tmpStatic goto stop_internal else cont_internal;
-cont1:
-    := gotoSymbol 'goto;
-    := tmpStatic == op gotoSymbol;
-    if tmpStatic goto do_goto else cont2;
-cont2:
-    := ifSymbol 'if;
-    := tmpStatic == op ifSymbol;
-    if tmpStatic goto do_if else cont3;
-cont3:
-    := returnSymbol 'return;
-    := tmpStatic == op returnSymbol;
-    if tmpStatic goto do_return else fail;
-fail:
-    := fail 'fail;
-    return fail;
-stop_internal:
+    := code extendReturn code reduce exp vs;
+    if isEmpty bb goto #stop_internal! else #cont_internal!;
+#cont1!:
+    if == op %goto/ goto #do_goto! else #cont2!;
+#cont2!:
+    if == op %if/ goto #do_if! else #cont3!;
+#cont3!:
+    if == op %return/ goto #do_return! else #fail!;
+#fail!:
+    return %fail/;
+#stop_internal!:
     := residual extendCode residual code;
-    := tmpDynamic isEmpty pending;
-    if tmpDynamic goto stop_external else cont_external;
-stop_external:
+    if isEmpty pending goto #stop_external! else #cont_external!;
+#stop_external!:
     return residual;
 }

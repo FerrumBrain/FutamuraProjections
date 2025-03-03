@@ -1,0 +1,100 @@
+{
+read vs0;
+#lab0!:
+    := residual {} ;
+    := used (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
+    := pending ((#init! $ vs0)) ;
+    := marked () ;
+    := pp hd hd pending ;
+    := vs hd tl hd pending ;
+    := marked cons (pp $ vs) marked ;
+    := code initialCode pp vs used ;
+    := pending tl pending ;
+    if == #init! pp goto #lab1! else #lab2! ;
+
+
+#lab2!:
+    if == #should_be_unreachable! pp goto #lab3! else #lab4! ;
+
+
+#lab4!:
+    if == #should_be_unreachable! pp goto #lab3! else #lab4! ;
+
+
+#lab3!:
+    return fail ;
+
+
+#lab1!:
+    := code extendAssignment code %residual/ reduce %{}/ vs ;
+    := code extendAssignment code %used/ reduce %usedVars program/ vs ;
+    := code extendAssignment code %pp0/ reduce %lookupInitial program/ vs ;
+    := code extendAssignment code %pendingLabels/ reduce %()/ vs ;
+    := code extendAssignment code %pending/ reduce %((pp0$vs0))/ vs ;
+    := code extendAssignment code %marked/ reduce %()/ vs ;
+    := code extendAssignment code %pp/ reduce %hd hd pending/ vs ;
+    := code extendAssignment code %vs/ reduce %hd tl hd pending/ vs ;
+    := code extendAssignment code %marked/ reduce %cons (pp $ vs) marked/ vs ;
+    := code extendAssignment code %code/ reduce %initialCode pp vs used/ vs ;
+    := code extendAssignment code %pending/ reduce %tl pending/ vs ;
+    := code extendAssignment code %ppi/ reduce %pp0/ vs ;
+    := code extendAssignment code %bb/ reduce %lookup pp0 program/ vs ;
+    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked used ;
+    := pending consUniqueIfNotInWithStateCompression (%#continue_lookup!/ $ vs) pending marked used ;
+    := code extendIf code reduce %== ppi pp/ vs %#cont_internal!/ %#continue_lookup!/ vs used ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab6! ;
+
+
+#lab6!:
+    := pp hd hd pending ;
+    := vs hd tl hd pending ;
+    := marked cons (pp $ vs) marked ;
+    := code initialCode pp vs used ;
+    := pending tl pending ;
+    if == #init! pp goto #lab1! else #lab7! ;
+
+
+#lab7!:
+    if == #continue_lookup! pp goto #lab8! else #lab9! ;
+
+
+#lab9!:
+    if == #cont_internal! pp goto #lab10! else #lab11! ;
+
+
+#lab11!:
+    if == #should_be_unreachable! pp goto #lab3! else #lab12! ;
+
+
+#lab12!:
+    if == #should_be_unreachable! pp goto #lab3! else #lab12! ;
+
+
+#lab10!:
+    := code extendAssignment code %command/ reduce %firstCommand bb/ vs ;
+    := code extendAssignment code %bb/ reduce %tl bb/ vs ;
+    := code extendAssignment code %op/ reduce %hd command/ vs ;
+    := code extendAssignment code %command/ reduce %tl command/ vs ;
+    := pending consUniqueIfNotInWithStateCompression (%#do_assignment!/ $ vs) pending marked used ;
+    := pending consUniqueIfNotInWithStateCompression (%#cont1!/ $ vs) pending marked used ;
+    := code extendIf code reduce %== op %:=// vs %#do_assignment!/ %#cont1!/ vs used ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab6! ;
+
+
+#lab8!:
+    := code extendAssignment code %ppi/ reduce %nextLabel ppi program pendingLabels/ vs ;
+    := code extendAssignment code %bb/ reduce %lookup ppi program/ vs ;
+    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked used ;
+    := pending consUniqueIfNotInWithStateCompression (%#continue_lookup!/ $ vs) pending marked used ;
+    := code extendIf code reduce %== ppi pp/ vs %#cont_internal!/ %#continue_lookup!/ vs used ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab6! ;
+
+
+#lab5!:
+    return residual ;
+
+
+}

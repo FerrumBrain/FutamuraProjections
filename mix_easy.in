@@ -1,4 +1,4 @@
 /Users/Timur.Kudashev/CLionProjects/FlowchartFutamura/mix.flowchart
-{read name, namelist, valuelist; search: := tmp1 hd namelist; := condition1 == name tmp1; if condition1 goto found else cont; cont: := valuelist tl valuelist; := namelist tl namelist; goto search; found: := tmp2 hd valuelist; return tmp2;}
-(name$namelist$tmp1$condition1)
+{read name, namelist, valuelist; #search!: if == name hd namelist goto #found! else #cont!; #cont!: := valuelist tl valuelist; := namelist tl namelist; goto #search!; #found!: return hd valuelist;}
+(name$namelist)
 [name$z$namelist$(x$y$z)]
