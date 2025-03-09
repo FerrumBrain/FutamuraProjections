@@ -575,7 +575,7 @@ public:
     FlowchartList(const std::optional<FlowchartProgramState> &state, bool isReduce, const std::string &s,
                   const optional<vector<optional<FlowchartValue> > > &values);
 
-    FlowchartList(bool isReduce, const std::string &s, const optional<vector<optional<FlowchartValue> > > &values);
+    FlowchartList(const std::string &s, const optional<vector<optional<FlowchartValue> > > &values);
 
     static bool is_correct_string(const std::string &str) {
         return !str.empty() && str.front() == '(' && str.back() == ')';
@@ -640,7 +640,7 @@ public:
     }
 
     [[nodiscard]] FlowchartList get_used_vars() const {
-        auto result = FlowchartList(false, "()", {});
+        auto result = FlowchartList("()", {});
 
         if (enableLogging) cout << "FlowchartProgram.get_used_vars: Start: " << current_time() << endl;
         auto lines = vector<string>{};
@@ -666,9 +666,9 @@ public:
             auto label = FlowchartLabel(Util::strip_spaces(tokens[0]));
             string line = Util::join(1, tokens.size(), tokens, ":");
 
-            result.values.emplace_back(FlowchartList(false, "", vector{
+            result.values.emplace_back(FlowchartList("", vector{
                                                          optional<FlowchartValue>(label),
-                                                         optional<FlowchartValue>(FlowchartList(false, "()", {}))
+                                                         optional<FlowchartValue>(FlowchartList("()", {}))
                                                      }));
             set<FlowchartVariable> rewrote = {};
             while (!Util::is_correct_jump(line)) {
@@ -922,34 +922,8 @@ public:
         }
         oss << "}";
 
-        // auto result = oss.str();
-        // map<string, string> mapping = {};
-        // int counter = 0;
-        // for (const auto &label: labels) {
-        //     for (const auto &stmt: blocks.at(label).contents) {
-        //         auto tokens = Util::split_on_level(stmt.to_string(), ' ', 0);
-        //         for (const auto &expr: tokens) {
-        //             if (is_correct_string(expr)) {
-        //                 if (mapping.contains(expr)) continue;
-        //                 mapping[expr] = "program" + std::to_string(counter++);
-        //             }
-        //         }
-        //     }
-        // }
-        // string additional;
-        // if (counter > 0) {
-        //     additional = "{\n#lab_parse!:\n";
-        //     for (const auto& [k, v]: mapping) {
-        //         additional += "    := " + v + " " + k + ";\n";
-        //         additional += "    := " + v + " parse " + v + ";\n";
-        //         replaceAll(result, k, v);
-        //     }
-        //     additional += "\n    goto #lab0!;\n";
-        //     result = result.substr(2);
-        // }
-
         if (enableLogging) cout << "FlowchartProgram.to_string: End: " << current_time() << endl;
-        return oss.str(); //additional + result;
+        return oss.str();
     }
 };
 
@@ -1020,7 +994,7 @@ string pretty_print_value(optional<FlowchartValue> value) {
             result = literal->to_string();
         } else {
             throw std::runtime_error("Unexpected value");
-        } // TODO
+        }
     } else {
         result = "None";
     }
@@ -1062,7 +1036,7 @@ bool FlowchartProgramState::is_static(const FlowchartList &division, const strin
 optional<FlowchartValue>
 value_from_raw(const string &raw, optional<FlowchartProgramState> state, const bool is_reduce) {
     if (enableLogging) cout << "value_from_raw(" << raw << "): Start: " << current_time() << endl;
-    string s = Util::strip_spaces(raw);
+    const string s = Util::strip_spaces(raw);
     optional<FlowchartValue> result;
     if (FlowchartList::is_correct_string(s)) result = FlowchartList(state, is_reduce, s, {});
     else if (TuringMachineProgram::is_correct_string(s)) result = TuringMachineProgram(s, {}, {});
@@ -1254,8 +1228,7 @@ FlowchartList::FlowchartList(const std::optional<FlowchartProgramState> &state, 
     if (enableLogging) cout << "FlowchartList: End: " << current_time() << endl;
 }
 
-FlowchartList::FlowchartList(const bool isReduce,
-                             const std::string &s,
+FlowchartList::FlowchartList(const std::string &s,
                              const optional<std::vector<optional<FlowchartValue> > > &values) {
     if (enableLogging) cout << "FlowchartList: Start: " << current_time() << endl;
     if (values.has_value()) {
@@ -1276,8 +1249,8 @@ FlowchartList::FlowchartList(const bool isReduce,
 [[nodiscard]] FlowchartList FlowchartList::tail() const {
     if (enableLogging) cout << "FlowchartList.tail: Start: " << current_time() << endl;
     auto result = values.size() < 2
-                      ? FlowchartList(false, "", optional(vector<optional<FlowchartValue> >{}))
-                      : FlowchartList(false, "", vector(values.begin(), values.end() - 1));
+                      ? FlowchartList("", optional(vector<optional<FlowchartValue> >{}))
+                      : FlowchartList("", vector(values.begin(), values.end() - 1));
     if (enableLogging) cout << "FlowchartList.tail: End: " << current_time() << endl;
     return result;
 }
@@ -1327,7 +1300,6 @@ std::optional<FlowchartValue> Statement::head() const {
     if (FlowchartLiteral::is_correct_string(elems[0])) return FlowchartLiteral(elems[0]);
     return FlowchartLiteral('%' + elems[0] + '/');
 }
-
 
 string string_from_literal_or_value(optional<FlowchartValue> raw) {
     if (auto *literal = as<FlowchartLiteral>(raw.value())) {
@@ -1399,7 +1371,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
 
             if (!r) {
                 if (auto *var = const_as<FlowchartVariable>(v.value())) {
-                    reduced += var->name; // TODO?
+                    reduced += var->name;
                 } else {
                     reduced += const_as<FlowchartLiteral>(v.value())->value;
                 }
