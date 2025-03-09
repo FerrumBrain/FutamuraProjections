@@ -1099,12 +1099,6 @@ class FlowchartInterpreter {
             if (label_counter % 1000 == 0) {
                 cout << label_counter << ": " << current_label.value_or(FlowchartLabel("the end")).value << endl;
             }
-            if (program.state.variables.contains(FlowchartVariable("pp")) && program.state.variables[
-                    FlowchartVariable("pp")].has_value() && label_counter >= 670 && as<FlowchartLabel>(
-                    program.state.variables[FlowchartVariable("pp")].value())->value == "#cont_internal!") {
-                auto x = as<FlowchartLabel>(program.state.variables[FlowchartVariable("pp")].value())->value;
-                cout << "aboba\n";
-            }
         }
     }
 
