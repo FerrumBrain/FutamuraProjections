@@ -7,302 +7,239 @@ read vs0;
     := pp hd hd pending ;
     := vs hd tl hd pending ;
     := marked cons (pp $ vs) marked ;
-    := code initialCode pp vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
+    := code initialCode pp vs (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
     := pending tl pending ;
     if == #init! pp goto #lab1! else #lab2! ;
 
 
 #lab2!:
-    if == #cont_external! pp goto #lab3! else #lab4! ;
+    if == #loop! pp goto #lab3! else #lab4! ;
 
 
 #lab4!:
-    if == #continue_lookup! pp goto #lab5! else #lab6! ;
+    if == #cont! pp goto #lab5! else #lab6! ;
 
 
 #lab6!:
-    if == #cont_internal! pp goto #lab7! else #lab8! ;
+    if == #cont1! pp goto #lab7! else #lab8! ;
 
 
 #lab8!:
-    if == #do_assignment! pp goto #lab9! else #lab10! ;
+    if == #cont2! pp goto #lab9! else #lab10! ;
 
 
 #lab10!:
-    if == #do_assignment_static! pp goto #lab11! else #lab12! ;
+    if == #cont3! pp goto #lab11! else #lab12! ;
 
 
 #lab12!:
-    if == #do_assignment_dynamic! pp goto #lab13! else #lab14! ;
+    if == #cont4! pp goto #lab13! else #lab14! ;
 
 
 #lab14!:
-    if == #do_goto! pp goto #lab15! else #lab16! ;
+    if == #do_right! pp goto #lab15! else #lab16! ;
 
 
 #lab16!:
-    if == #do_if! pp goto #lab17! else #lab18! ;
+    if == #do_left! pp goto #lab17! else #lab18! ;
 
 
 #lab18!:
-    if == #do_if_static! pp goto #lab19! else #lab20! ;
+    if == #do_write! pp goto #lab19! else #lab20! ;
 
 
 #lab20!:
-    if == #do_if_static_true! pp goto #lab21! else #lab22! ;
+    if == #do_goto! pp goto #lab21! else #lab22! ;
 
 
 #lab22!:
-    if == #do_if_static_false! pp goto #lab23! else #lab24! ;
+    if == #do_if! pp goto #lab23! else #lab24! ;
 
 
 #lab24!:
-    if == #do_if_dynamic! pp goto #lab25! else #lab26! ;
+    if == #jump! pp goto #lab25! else #lab26! ;
 
 
 #lab26!:
-    if == #do_return! pp goto #lab27! else #lab28! ;
+    if == #error! pp goto #lab27! else #lab28! ;
 
 
 #lab28!:
-    if == #cont1! pp goto #lab29! else #lab30! ;
+    if == #stop! pp goto #lab29! else #lab30! ;
 
 
 #lab30!:
-    if == #cont2! pp goto #lab31! else #lab32! ;
+    if == #fail! pp goto #lab31! else #lab32! ;
 
 
 #lab32!:
-    if == #cont3! pp goto #lab33! else #lab34! ;
+    if == #fail! pp goto #lab31! else #lab32! ;
+
+
+#lab31!:
+    return fail ;
+
+
+#lab29!:
+    := code extendReturn code reduce %Right/ vs ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab33! else #lab34! ;
 
 
 #lab34!:
-    if == #fail! pp goto #lab35! else #lab36! ;
-
-
-#lab36!:
-    if == #stop_internal! pp goto #lab37! else #lab38! ;
-
-
-#lab38!:
-    if == #stop_external! pp goto #lab39! else #lab40! ;
-
-
-#lab40!:
-    if == #fail! pp goto #lab35! else #lab36! ;
-
-
-#lab39!:
-    := code extendReturn code reduce %residual/ vs ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
-
-
-#lab42!:
     := pp hd hd pending ;
     := vs hd tl hd pending ;
     := marked cons (pp $ vs) marked ;
-    := code initialCode pp vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
+    := code initialCode pp vs (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
     := pending tl pending ;
     if == #init! pp goto #lab1! else #lab2! ;
 
 
-#lab41!:
+#lab33!:
     return residual ;
 
 
-#lab37!:
-    := code extendAssignment code %residual/ reduce %extendCode residual code/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_external!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_external!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty pending/ vs %#stop_external!/ %#cont_external!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
-
-
-#lab35!:
+#lab27!:
     := code extendReturn code reduce %fail/ vs ;
     := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
-
-
-#lab33!:
-    := pending consUniqueIfNotInWithStateCompression (%#do_return!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#fail!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== op %return// vs %#do_return!/ %#fail!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
-
-
-#lab31!:
-    := pending consUniqueIfNotInWithStateCompression (%#do_if!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont3!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== op %if// vs %#do_if!/ %#cont3!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
-
-
-#lab29!:
-    := pending consUniqueIfNotInWithStateCompression (%#do_goto!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont2!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== op %goto// vs %#do_goto!/ %#cont2!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
-
-
-#lab27!:
-    := code extendAssignment code %exp/ reduce %hd command/ vs ;
-    := code extendAssignment code %code/ reduce %extendReturn code reduce exp vs/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if isEmpty pending goto #lab33! else #lab34! ;
 
 
 #lab25!:
-    := code extendAssignment code %pendingLabels/ reduce %consUnique trueLabel pendingLabels/ vs ;
-    := code extendAssignment code %pending/ reduce %consUniqueIfNotInWithStateCompression (trueLabel$vs) pending marked used/ vs ;
-    := code extendAssignment code %pendingLabels/ reduce %consUnique falseLabel pendingLabels/ vs ;
-    := code extendAssignment code %pending/ reduce %consUniqueIfNotInWithStateCompression (falseLabel$vs) pending marked used/ vs ;
-    := code extendAssignment code %code/ reduce %extendIf code reduce exp vs trueLabel falseLabel vs used/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
+    := vs addToState vs %Qtail/ eval %newTail Nextlabel Q/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
+
+
+#lab36!:
+    := vs addToState vs %Instruction/ eval %firstInstruction Qtail/ vs ;
+    := vs addToState vs %Qtail/ eval %rest Qtail/ vs ;
+    := vs addToState vs %Operator/ eval %hd Instruction/ vs ;
+    if eval %== Operator %right// vs goto #lab37! else #lab38! ;
+
+
+#lab38!:
+    if eval %== Operator %left// vs goto #lab39! else #lab40! ;
+
+
+#lab40!:
+    if eval %== Operator %write// vs goto #lab41! else #lab42! ;
+
+
+#lab42!:
+    if eval %== Operator %goto// vs goto #lab43! else #lab44! ;
+
+
+#lab44!:
+    if eval %== Operator %if// vs goto #lab45! else #lab46! ;
+
+
+#lab46!:
+    := code extendReturn code reduce %fail/ vs ;
     := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if isEmpty pending goto #lab33! else #lab34! ;
+
+
+#lab45!:
+    := vs addToState vs %Symbol/ eval %hd tl Instruction/ vs ;
+    := vs addToState vs %Nextlabel/ eval %hd tl tl tl Instruction/ vs ;
+    := pending consUniqueIfNotInWithStateCompression (%#jump!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := pending consUniqueIfNotInWithStateCompression (%#loop!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := code extendIf code reduce %== Symbol firstSym Right/ vs %#jump!/ %#loop!/ vs (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab33! else #lab34! ;
+
+
+#lab43!:
+    := vs addToState vs %Qtail/ eval %newTail hd tl Instruction Q/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
+
+
+#lab41!:
+    := code extendAssignment code %Right/ reduce %cons hd tl Instruction tl Right/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
+
+
+#lab39!:
+    := code extendAssignment code %Right/ reduce %cons firstSym Left Right/ vs ;
+    := code extendAssignment code %Left/ reduce %tl Left/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
+
+
+#lab37!:
+    := code extendAssignment code %Left/ reduce %cons firstSym Right Left/ vs ;
+    := code extendAssignment code %Right/ reduce %tl Right/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
+
+
+#lab35!:
+    := code extendReturn code reduce %Right/ vs ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab33! else #lab34! ;
 
 
 #lab23!:
-    := code extendAssignment code %bb/ reduce %lookup falseLabel program/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
+    := vs addToState vs %Symbol/ eval %hd tl Instruction/ vs ;
+    := vs addToState vs %Nextlabel/ eval %hd tl tl tl Instruction/ vs ;
+    := pending consUniqueIfNotInWithStateCompression (%#jump!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := pending consUniqueIfNotInWithStateCompression (%#loop!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := code extendIf code reduce %== Symbol firstSym Right/ vs %#jump!/ %#loop!/ vs (((%Right/) $ #stop!) $ (() $ #error!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
     := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if isEmpty pending goto #lab33! else #lab34! ;
 
 
 #lab21!:
-    := code extendAssignment code %bb/ reduce %lookup trueLabel program/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    := vs addToState vs %Qtail/ eval %newTail hd tl Instruction Q/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
 
 
 #lab19!:
-    := pending consUniqueIfNotInWithStateCompression (%#do_if_static_true!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#do_if_static_false!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %eval exp vs/ vs %#do_if_static_true!/ %#do_if_static_false!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    := code extendAssignment code %Right/ reduce %cons hd tl Instruction tl Right/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
 
 
 #lab17!:
-    := code extendAssignment code %exp/ reduce %hd command/ vs ;
-    := code extendAssignment code %trueLabel/ reduce %hd tl tl command/ vs ;
-    := code extendAssignment code %falseLabel/ reduce %hd tl tl tl tl command/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#do_if_static!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#do_if_dynamic!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isStatic division exp/ vs %#do_if_static!/ %#do_if_dynamic!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    := code extendAssignment code %Right/ reduce %cons firstSym Left Right/ vs ;
+    := code extendAssignment code %Left/ reduce %tl Left/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
 
 
 #lab15!:
-    := code extendAssignment code %bb/ reduce %lookup hd command program/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    := code extendAssignment code %Left/ reduce %cons firstSym Right Left/ vs ;
+    := code extendAssignment code %Right/ reduce %tl Right/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
 
 
 #lab13!:
-    := code extendAssignment code %code/ reduce %extendAssignment code X reduce exp vs/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if eval %== Operator %if// vs goto #lab45! else #lab46! ;
 
 
 #lab11!:
-    := code extendAssignment code %vs/ reduce %addToState vs X eval exp vs/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#stop_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isEmpty bb/ vs %#stop_internal!/ %#cont_internal!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if eval %== Operator %goto// vs goto #lab43! else #lab44! ;
 
 
 #lab9!:
-    := code extendAssignment code %X/ reduce %hd command/ vs ;
-    := code extendAssignment code %exp/ reduce %hd tl command/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#do_assignment_static!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#do_assignment_dynamic!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %isStatic division X/ vs %#do_assignment_static!/ %#do_assignment_dynamic!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if eval %== Operator %write// vs goto #lab41! else #lab42! ;
 
 
 #lab7!:
-    := code extendAssignment code %command/ reduce %firstCommand bb/ vs ;
-    := code extendAssignment code %bb/ reduce %tl bb/ vs ;
-    := code extendAssignment code %op/ reduce %hd command/ vs ;
-    := code extendAssignment code %command/ reduce %tl command/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#do_assignment!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont1!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== op %:=// vs %#do_assignment!/ %#cont1!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if eval %== Operator %left// vs goto #lab39! else #lab40! ;
 
 
 #lab5!:
-    := code extendAssignment code %ppi/ reduce %nextLabel ppi program pendingLabels/ vs ;
-    := code extendAssignment code %bb/ reduce %lookup ppi program/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#continue_lookup!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== ppi pp/ vs %#cont_internal!/ %#continue_lookup!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    := vs addToState vs %Instruction/ eval %firstInstruction Qtail/ vs ;
+    := vs addToState vs %Qtail/ eval %rest Qtail/ vs ;
+    := vs addToState vs %Operator/ eval %hd Instruction/ vs ;
+    if eval %== Operator %right// vs goto #lab37! else #lab38! ;
 
 
 #lab3!:
-    := code extendAssignment code %pp/ reduce %hd hd pending/ vs ;
-    := code extendAssignment code %vs/ reduce %hd tl hd pending/ vs ;
-    := code extendAssignment code %marked/ reduce %cons (pp $ vs) marked/ vs ;
-    := code extendAssignment code %code/ reduce %initialCode pp vs used/ vs ;
-    := code extendAssignment code %pending/ reduce %tl pending/ vs ;
-    := code extendAssignment code %ppi/ reduce %pp0/ vs ;
-    := code extendAssignment code %bb/ reduce %lookup pp0 program/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#continue_lookup!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== ppi pp/ vs %#cont_internal!/ %#continue_lookup!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
 
 
 #lab1!:
-    := code extendAssignment code %residual/ reduce %{}/ vs ;
-    := code extendAssignment code %used/ reduce %usedVars program/ vs ;
-    := code extendAssignment code %pp0/ reduce %lookupInitial program/ vs ;
-    := code extendAssignment code %pendingLabels/ reduce %()/ vs ;
-    := code extendAssignment code %pending/ reduce %((pp0$vs0))/ vs ;
-    := code extendAssignment code %marked/ reduce %()/ vs ;
-    := code extendAssignment code %pp/ reduce %hd hd pending/ vs ;
-    := code extendAssignment code %vs/ reduce %hd tl hd pending/ vs ;
-    := code extendAssignment code %marked/ reduce %cons (pp $ vs) marked/ vs ;
-    := code extendAssignment code %code/ reduce %initialCode pp vs used/ vs ;
-    := code extendAssignment code %pending/ reduce %tl pending/ vs ;
-    := code extendAssignment code %ppi/ reduce %pp0/ vs ;
-    := code extendAssignment code %bb/ reduce %lookup pp0 program/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#cont_internal!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#continue_lookup!/ $ vs) pending marked (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := code extendIf code reduce %== ppi pp/ vs %#cont_internal!/ %#continue_lookup!/ vs (((%residual/) $ #stop_external!) $ ((%pending/ $ %code/ $ %residual/) $ #stop_internal!) $ (() $ #fail!) $ ((%op/) $ #cont3!) $ ((%op/) $ #cont2!) $ ((%op/) $ #cont1!) $ ((%bb/ $ %vs/ $ %code/ $ %command/) $ #do_return!) $ ((%bb/ $ %used/ $ %vs/ $ %falseLabel/ $ %trueLabel/ $ %vs/ $ %exp/ $ %code/ $ %used/ $ %marked/ $ %falseLabel/ $ %used/ $ %marked/ $ %pending/ $ %pendingLabels/ $ %trueLabel/) $ #do_if_dynamic!) $ ((%program/ $ %falseLabel/) $ #do_if_static_false!) $ ((%program/ $ %trueLabel/) $ #do_if_static_true!) $ ((%vs/ $ %exp/) $ #do_if_static!) $ ((%division/ $ %command/ $ %command/ $ %command/) $ #do_if!) $ ((%program/ $ %command/) $ #do_goto!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %code/) $ #do_assignment_dynamic!) $ ((%bb/ $ %vs/ $ %exp/ $ %X/ $ %vs/) $ #do_assignment_static!) $ ((%division/ $ %command/ $ %command/) $ #do_assignment!) $ ((%bb/ $ %bb/) $ #cont_internal!) $ ((%pp/ $ %program/ $ %pendingLabels/ $ %program/ $ %ppi/) $ #continue_lookup!) $ ((%program/ $ %pp0/ $ %pp0/ $ %pending/ $ %used/ $ %marked/ $ %pending/ $ %pending/) $ #cont_external!) $ ((%vs0/ $ %program/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab41! else #lab42! ;
+    := vs addToState vs %Qtail/ eval %Q/ vs ;
+    := code extendAssignment code %Left/ reduce %()/ vs ;
+    if eval %== Qtail <>/ vs goto #lab35! else #lab36! ;
 
 
 }

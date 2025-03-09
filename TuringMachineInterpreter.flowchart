@@ -18,7 +18,7 @@ read Q, Right;
 #cont3!:
     if == Operator %goto/ goto #do_goto! else #cont4!;
 #cont4!:
-    if == Operator %if/ goto #do_if! else #error!;
+    if == Operator %if/ goto #do_if! else #fail!;
 #do_right!:
     := Left cons firstSym Right Left;
     := Right tl Right;
@@ -40,7 +40,7 @@ read Q, Right;
 #jump!:
     := Qtail newTail Nextlabel Q;
     goto #loop!;
-#error!:
+#fail!:
     return %fail/;
 #stop!:
     return Right;

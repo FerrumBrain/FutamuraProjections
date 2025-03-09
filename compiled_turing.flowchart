@@ -1,5 +1,5 @@
 {
-read Right;
+read vs0;
 #lab0!:
     := residual {} ;
     := used usedVars program ;

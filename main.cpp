@@ -679,7 +679,7 @@ public:
                     if (rewrote.contains(FlowchartVariable(cmd_tokens[o]))) continue;
                     as<FlowchartList>(
                                 as<FlowchartList>(result.values[result.values.size() - 1].value())->values[1].value())->
-                                    values.emplace_back(FlowchartLiteral("%" + cmd_tokens[o] + "/"));
+                            values.emplace_back(FlowchartLiteral("%" + cmd_tokens[o] + "/"));
                 }
                 rewrote.insert(FlowchartVariable(cmd_tokens[1]));
 
@@ -694,7 +694,7 @@ public:
                     if (rewrote.contains(FlowchartVariable(cmd_tokens[o]))) continue;
                     as<FlowchartList>(
                                 as<FlowchartList>(result.values[result.values.size() - 1].value())->values[1].value())->
-                                    values.emplace_back(FlowchartLiteral("%" + cmd_tokens[o] + "/"));
+                            values.emplace_back(FlowchartLiteral("%" + cmd_tokens[o] + "/"));
                 }
             } else if (cmd_tokens[0] == "if") {
                 for (int o = 1; o < cmd_tokens.size() - 4; o++) {
@@ -703,7 +703,7 @@ public:
                     if (rewrote.contains(FlowchartVariable(cmd_tokens[o]))) continue;
                     as<FlowchartList>(
                                 as<FlowchartList>(result.values[result.values.size() - 1].value())->values[1].value())->
-                                    values.emplace_back(FlowchartLiteral("%" + cmd_tokens[o] + "/"));
+                            values.emplace_back(FlowchartLiteral("%" + cmd_tokens[o] + "/"));
                 }
             }
             i++;
@@ -828,7 +828,7 @@ public:
                             FlowchartProgramState>(result.state.variables[vs_arg].value())->variables.contains(
                             parsed_program_arg))
                         as<FlowchartProgramState>(result.state.variables[vs_arg].value())->variables[parsed_program_arg]
-                                = result.state.variables[parsed_program_arg];
+                                = as<FlowchartProgram>(result.state.variables[parsed_program_arg].value())->state.variables[parsed_program_arg];
                 } else {
                     result.blocks[label].add_line(Statement({}, line, false, true));
                 }
@@ -886,16 +886,19 @@ public:
     FlowchartLabel next_label(const FlowchartLabel &label, const FlowchartList &pendingLabels) {
         if (enableLogging) cout << "FlowchartProgram.next_label: Start: " << current_time() << endl;
         auto index = ranges::find(labels, label) - labels.begin() + 1;
-        // while (index < labels.size()) {
-        //     for (auto value : pendingLabels.values) {
-        //         if (labels[index] == *const_as<FlowchartLabel>(value.value())) {
-        //             return labels[index];
-        //         }
-        //     }
-        //     index++;
-        // }
-        if (index < labels.size()) {
-            return labels[index];
+        if (false) {
+            while (index < labels.size()) {
+                for (auto value: pendingLabels.values) {
+                    if (labels[index] == *const_as<FlowchartLabel>(value.value())) {
+                        return labels[index];
+                    }
+                }
+                index++;
+            }
+        } else {
+            if (index < labels.size()) {
+                return labels[index];
+            }
         }
         if (enableLogging) cout << "FlowchartProgram.next_label: End: " << current_time() << endl;
         return FlowchartLabel("#fail!");
@@ -1043,9 +1046,10 @@ value_from_raw(const string &raw, optional<FlowchartProgramState> state, const b
     else if (FlowchartProgramState::is_correct_string(s)) result = FlowchartProgramState(state, is_reduce, s);
     else if (FlowchartProgram::is_correct_string(s)) result = FlowchartProgram(state, is_reduce, s, "");
     else if (FlowchartLiteral::is_correct_string(s)) result = FlowchartLiteral(s);
-    else if (FlowchartVariable::is_correct_string(s)) result = state.has_value()
-                                                                   ? state.value().eval_expr(s, is_reduce).second
-                                                                   : FlowchartVariable(s);
+    else if (FlowchartVariable::is_correct_string(s))
+        result = state.has_value()
+                     ? state.value().eval_expr(s, is_reduce).second
+                     : FlowchartVariable(s);
     else if (FlowchartLabel::is_correct_string(s)) result = FlowchartLabel(s);
     else throw std::runtime_error("FlowchartValue is not a FlowchartValue");
     if (enableLogging) cout << "value_from_raw(" << raw << "): End: " << current_time() << endl;
@@ -1094,6 +1098,12 @@ class FlowchartInterpreter {
             label_counter++;
             if (label_counter % 1000 == 0) {
                 cout << label_counter << ": " << current_label.value_or(FlowchartLabel("the end")).value << endl;
+            }
+            if (program.state.variables.contains(FlowchartVariable("pp")) && program.state.variables[
+                    FlowchartVariable("pp")].has_value() && label_counter >= 670 && as<FlowchartLabel>(
+                    program.state.variables[FlowchartVariable("pp")].value())->value == "#cont_internal!") {
+                auto x = as<FlowchartLabel>(program.state.variables[FlowchartVariable("pp")].value())->value;
+                cout << "aboba\n";
             }
         }
     }
@@ -1284,8 +1294,9 @@ FlowchartProgramState::compress(const FlowchartLabel &label, const FlowchartList
             if (*as<FlowchartLabel>(l->values[0].value()) == label) {
                 for (const auto &v: as<FlowchartList>(l->values[1].value())->values) {
                     auto var = *const_as<FlowchartLiteral>(v.value());
-                    if (!variables.contains(FlowchartVariable(var.value))) result.append(
-                        FlowchartVariable(var.value), nullopt);
+                    if (!variables.contains(FlowchartVariable(var.value)))
+                        result.append(
+                            FlowchartVariable(var.value), nullopt);
                     else result.append(FlowchartVariable(var.value), variables.at(FlowchartVariable(var.value)));
                 }
                 return result;
@@ -1345,8 +1356,9 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
         }
         if (Util::is_correct_value(tokens[0]) && !FlowchartVariable::is_correct_string(tokens[0])) {
             auto result = make_pair(true, value_from_raw(tokens[0], *this, is_reduce));
-            if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                               endl;
+            if (enableLogging)
+                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
+                        endl;
             return result;
         }
         if (is_reduce && FlowchartVariable::is_correct_string(tokens[0])) {
