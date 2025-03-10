@@ -248,9 +248,9 @@ map<string, int> Util::functions = {
 
     {"hasNext", 2}, {"==", 2}, {"cons", 2}, {"newTail", 2}, {"eval", 2}, {"reduce", 2},
     {"isStatic", 2}, {"consUnique", 2}, {"lookup", 2}, {"in", 2}, {"extendReturn", 2}, {"extendCode", 2},
-    {"getLabel", 2}, {"parse", 2}, {"extendGoto", 2}, {"lookupLiteral", 2},
+    {"getLabel", 2}, {"parse", 2}, {"extendGoto", 2}, {"lookupLiteral", 2}, {"nextLabel", 2},
 
-    {"addToState", 3}, {"extendAssignment", 3}, {"ternaryOperator", 3}, {"nextLabel", 3}, {"initialCode", 3},
+    {"addToState", 3}, {"extendAssignment", 3}, {"ternaryOperator", 3}, {"initialCode", 3},
 
     {"consUniqueIfNotInWithStateCompression", 4},
 
@@ -821,7 +821,7 @@ public:
         return labels[index];
     }
 
-    FlowchartLabel next_label(const FlowchartLabel &label, const FlowchartList &pendingLabels) {
+    FlowchartLabel next_label(const FlowchartLabel &label) {
         const auto index = ranges::find(labels, label) - labels.begin() + 1;
         return index < labels.size() ? labels[index] : FlowchartLabel("#fail!");
     }
@@ -1446,8 +1446,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             }
         } else if (op == "nextLabel") {
             auto *program = as<FlowchartProgram>(values[1].value());
-            auto *pendingLabels = as<FlowchartList>(values[2].value());
-            return make_pair(true, program->next_label(*as<FlowchartLabel>(values[0].value()), *pendingLabels));
+            return make_pair(true, program->next_label(*as<FlowchartLabel>(values[0].value())));
         } else if (op == "getLabel") {
             auto *program = as<FlowchartProgram>(values[1].value());
             return make_pair(true, program->get_label(stoi(as<FlowchartLiteral>(values[0].value())->value)));
