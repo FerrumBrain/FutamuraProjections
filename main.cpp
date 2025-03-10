@@ -33,23 +33,12 @@ using FlowchartValue = std::variant<
     FlowchartProgramState
 >;
 
-bool enableLogging = false;
-
 void replaceAll(std::string &str, const std::string &from, const std::string &to) {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
         start_pos += to.length();
     }
-}
-
-long long current_time() {
-    static long long last_time = 0;
-    auto result = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
-    auto last_time_copy = last_time;
-    last_time = result;
-    return result - last_time_copy;
 }
 
 class FlowchartLabel {
@@ -290,7 +279,6 @@ public:
                        const bool split_by_spaces = false,
                        const bool split_by_expr = false): split_by_spaces(split_by_spaces),
                                                           split_by_expr(split_by_expr) {
-        if (enableLogging) cout << "Statement: Start: " << current_time() << endl;
         if (elems.empty()) {
             this->elems.clear();
             if (!code.empty()) {
@@ -329,25 +317,18 @@ public:
         } else {
             this->elems = elems;
         }
-        if (enableLogging) cout << "Statement: End: " << current_time() << endl;
     }
 
     [[nodiscard]] std::optional<FlowchartValue> head() const;
 
     [[nodiscard]] Statement tail() const {
-        if (enableLogging) cout << "Statement.tail: Start: " << current_time() << endl;
-        const auto &result = elems.size() <= 1
-                                 ? Statement({}, "", split_by_spaces, split_by_expr)
-                                 : Statement(std::vector(elems.begin() + 1, elems.end()), "", split_by_spaces,
-                                             split_by_expr);
-        if (enableLogging) cout << "Statement.tail: End: " << current_time() << endl;
-        return result;
+        return elems.size() <= 1
+                   ? Statement({}, "", split_by_spaces, split_by_expr)
+                   : Statement(std::vector(elems.begin() + 1, elems.end()), "", split_by_spaces, split_by_expr);
     }
 
     void cons(const FlowchartLiteral &element) {
-        if (enableLogging) cout << "Statement.cons: Start: " << current_time() << endl;
         elems.insert(elems.begin(), element.value);
-        if (enableLogging) cout << "Statement.cons: End: " << current_time() << endl;
     }
 
     [[nodiscard]] bool is_empty() const {
@@ -355,19 +336,14 @@ public:
     }
 
     bool operator==(const Statement &other) const {
-        if (enableLogging) cout << "Statement.==: Start: " << current_time() << endl;
-        bool result = elems == other.elems;
-        if (enableLogging) cout << "Statement.==: End: " << current_time() << endl;
-        return result;
+        return elems == other.elems;
     }
 
     [[nodiscard]] std::string to_string() const {
-        if (enableLogging) cout << "Statement.to_string: Start: " << current_time() << endl;
         ostringstream oss;
         for (const auto &elem: elems) {
             oss << elem << " ";
         }
-        if (enableLogging) cout << "Statement.to_string: End: " << current_time() << endl;
         return oss.str();
     }
 
@@ -383,7 +359,6 @@ public:
 
     TuringMachineProgram(const string &keys_values, const map<FlowchartLabel, Statement> &dictionary,
                          const std::vector<FlowchartLabel> &order) {
-        if (enableLogging) cout << "TuringMachineProgram: Start: " << current_time() << endl;
         this->dictionary = {};
         this->order = {};
         if (keys_values.empty()) {
@@ -401,7 +376,6 @@ public:
                 }
             }
         }
-        if (enableLogging) cout << "TuringMachineProgram: End: " << current_time() << endl;
     }
 
     static bool is_correct_string(const std::string &str) {
@@ -413,14 +387,10 @@ public:
     }
 
     bool operator==(const TuringMachineProgram &other) const {
-        if (enableLogging) cout << "TuringMachineProgram.==: Start: " << current_time() << endl;
-        bool result = order == other.order && dictionary == other.dictionary;
-        if (enableLogging) cout << "TuringMachineProgram.==: End: " << current_time() << endl;
-        return result;
+        return order == other.order && dictionary == other.dictionary;
     }
 
     [[nodiscard]] std::string to_string() const {
-        if (enableLogging) cout << "TuringMachineProgram.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
         oss << "<";
         for (size_t i = 0; i < order.size(); ++i) {
@@ -428,7 +398,6 @@ public:
             oss << order[i].value << ": " << dictionary.at(order[i]).to_string();
         }
         oss << ">";
-        if (enableLogging) cout << "TuringMachineProgram.to_string: End: " << current_time() << endl;
         return oss.str();
     }
 
@@ -453,17 +422,11 @@ public:
     }
 
     [[nodiscard]] optional<Statement> get_line(const size_t index) const {
-        if (enableLogging) cout << "FlowchartBlock.get_line: Start: " << current_time() << endl;
-        auto result = index >= contents.size() ? nullopt : optional(contents[index]);
-        if (enableLogging) cout << "FlowchartBlock.get_line: End: " << current_time() << endl;
-        return result;
+        return index >= contents.size() ? nullopt : optional(contents[index]);
     }
 
     bool operator==(const FlowchartBlock &other) const {
-        if (enableLogging) cout << "FlowchartBlock.==: Start: " << current_time() << endl;
-        bool result = label == other.label && contents == other.contents;
-        if (enableLogging) cout << "FlowchartBlock.==: End: " << current_time() << endl;
-        return result;
+        return label == other.label && contents == other.contents;
     }
 
     [[nodiscard]] size_t size() const {
@@ -471,34 +434,27 @@ public:
     }
 
     [[nodiscard]] FlowchartBlock tail() const {
-        if (enableLogging) cout << "FlowchartBlock.tail: Start: " << current_time() << endl;
-        auto result = contents.size() < 2
-                          ? FlowchartBlock(label, {})
-                          : FlowchartBlock{label, std::vector(contents.begin() + 1, contents.end())};
-        if (enableLogging) cout << "FlowchartBlock.tail: End: " << current_time() << endl;
-        return result;
+        return contents.size() < 2
+                   ? FlowchartBlock(label, {})
+                   : FlowchartBlock{label, std::vector(contents.begin() + 1, contents.end())};
     }
 
     [[nodiscard]] std::string to_string() const {
-        if (enableLogging) cout << "FlowchartBlock.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
         oss << label.value << ": ";
         for (auto &line: contents) {
             oss << line.to_string() << "; ";
         }
-        if (enableLogging) cout << "FlowchartBlock.to_string: End: " << current_time() << endl;
         return oss.str();
     }
 
 
     [[nodiscard]] string pretty_print() const {
-        if (enableLogging) cout << "FlowchartBlock.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
         oss << label.value << ":\n";
         for (auto &line: contents) {
             oss << "    " << line.to_string() << ";\n";
         }
-        if (enableLogging) cout << "FlowchartBlock.to_string: End: " << current_time() << endl;
         return oss.str();
     }
 };
@@ -535,7 +491,6 @@ public:
     [[nodiscard]] FlowchartProgramState compress(const FlowchartLabel &label, const FlowchartList &used_vars) const;
 
     static vector<string> split_to_expr(const vector<string> &tokens, int expr_number) {
-        if (enableLogging) cout << "FlowchartProgramState.split_to_expr: Start: " << current_time() << endl;
         int balance = expr_number;
         vector<string> result;
         int last_index = 0;
@@ -551,11 +506,9 @@ public:
                 expr_number--;
             }
             if (expr_number == 0) {
-                if (enableLogging) cout << "FlowchartProgramState.split_to_expr: End: " << current_time() << endl;
                 return result;
             }
         }
-        if (enableLogging) cout << "FlowchartProgramState.split_to_expr: End: " << current_time() << endl;
         return result;
     }
 
@@ -612,7 +565,6 @@ public:
 
     FlowchartProgram(const optional<FlowchartProgramState> &parent_state, const bool is_reduce, const string &program,
                      const string &filename): state(parent_state, is_reduce, "") {
-        if (enableLogging) cout << "FlowchartProgram: Start: " << current_time() << endl;
         this->labels = {};
         this->blocks = {};
         this->is_reduce = is_reduce;
@@ -630,8 +582,6 @@ public:
 
         if (!is_correct_string(this->program))
             throw runtime_error("Invalid program provided");
-
-        if (enableLogging) cout << "FlowchartProgram: End: " << current_time() << endl;
     }
 
     void add_block(const FlowchartBlock &block) {
@@ -641,8 +591,6 @@ public:
 
     [[nodiscard]] FlowchartList get_used_vars() const {
         auto result = FlowchartList("()", {});
-
-        if (enableLogging) cout << "FlowchartProgram.get_used_vars: Start: " << current_time() << endl;
         auto lines = vector<string>{};
         for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(program.substr(1, program.size() - 2)), ';',
                                                         0)) {
@@ -708,7 +656,6 @@ public:
             }
             i++;
         }
-        if (enableLogging) cout << "FlowchartProgram.get_used_vars: End: " << current_time() << endl;
         return result;
     }
 
@@ -718,7 +665,6 @@ public:
             return false;
         }
         const string str = Util::strip_spaces(s.substr(1, s.size() - 2));
-        if (enableLogging) cout << "FlowchartProgram.is_correct_string: Start: " << current_time() << endl;
         auto lines = vector<string>{};
         for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(str), ';', 0)) {
             auto line = Util::strip_spaces(raw_line);
@@ -729,7 +675,6 @@ public:
         if (lines[0].rfind("read") == 0) {
             for (const auto tokens = Util::split_on_level(lines[0].substr(4), ',', 0); const auto &token: tokens) {
                 if (!FlowchartVariable::is_correct_string(Util::strip_spaces(token))) {
-                    if (enableLogging) cout << "FlowchartProgram.is_correct_string: End: " << current_time() << endl;
                     return false;
                 }
             }
@@ -746,13 +691,11 @@ public:
             string line = Util::join(1, tokens.size(), tokens, ":");
 
             if (!FlowchartLabel::is_correct_string(label)) {
-                if (enableLogging) cout << "FlowchartProgram.is_correct_string: End: " << current_time() << endl;
                 return false;
             }
 
             while (!Util::is_correct_jump(line)) {
                 if (!Util::is_correct_assignment(line)) {
-                    if (enableLogging) cout << "FlowchartProgram.is_correct_string: End: " << current_time() << endl;
                     Util::is_correct_jump(line);
                     return false;
                 }
@@ -761,13 +704,11 @@ public:
             }
             i++;
         }
-        if (enableLogging) cout << "FlowchartProgram.is_correct_string: End: " << current_time() << endl;
         return true;
     }
 
     FlowchartProgram parse_program(const bool read_from_input, const optional<FlowchartProgramState> &state,
                                    ifstream &ifs) const {
-        if (enableLogging) cout << "FlowchartProgram.parse_program: Start: " << current_time() << endl;
         auto lines = vector<string>{};
         for (const auto &raw_line: Util::split_on_level(Util::strip_spaces(program.substr(1, program.size() - 2)), ';',
                                                         0)) {
@@ -828,7 +769,8 @@ public:
                             FlowchartProgramState>(result.state.variables[vs_arg].value())->variables.contains(
                             parsed_program_arg))
                         as<FlowchartProgramState>(result.state.variables[vs_arg].value())->variables[parsed_program_arg]
-                                = as<FlowchartProgram>(result.state.variables[parsed_program_arg].value())->state.variables[parsed_program_arg];
+                                = as<FlowchartProgram>(result.state.variables[parsed_program_arg].value())->state.
+                                variables[parsed_program_arg];
                 } else {
                     result.blocks[label].add_line(Statement({}, line, false, true));
                 }
@@ -864,7 +806,6 @@ public:
             result.blocks[label].add_line(Statement({}, line, false, true));
             i++;
         }
-        if (enableLogging) cout << "FlowchartProgram.parse_program: End: " << current_time() << endl;
         return result;
     }
 
@@ -873,10 +814,7 @@ public:
     }
 
     bool has_next(const FlowchartLabel &label) {
-        if (enableLogging) cout << "FlowchartProgram.has_next: Start: " << current_time() << endl;
-        const auto result = ranges::find(labels, label) != labels.end();
-        if (enableLogging) cout << "FlowchartProgram.has_next: End: " << current_time() << endl;
-        return result;
+        return ranges::find(labels, label) != labels.end();
     }
 
     FlowchartLabel get_label(const int index) {
@@ -884,48 +822,27 @@ public:
     }
 
     FlowchartLabel next_label(const FlowchartLabel &label, const FlowchartList &pendingLabels) {
-        if (enableLogging) cout << "FlowchartProgram.next_label: Start: " << current_time() << endl;
-        auto index = ranges::find(labels, label) - labels.begin() + 1;
-        if (false) {
-            while (index < labels.size()) {
-                for (auto value: pendingLabels.values) {
-                    if (labels[index] == *const_as<FlowchartLabel>(value.value())) {
-                        return labels[index];
-                    }
-                }
-                index++;
-            }
-        } else {
-            if (index < labels.size()) {
-                return labels[index];
-            }
-        }
-        if (enableLogging) cout << "FlowchartProgram.next_label: End: " << current_time() << endl;
-        return FlowchartLabel("#fail!");
+        const auto index = ranges::find(labels, label) - labels.begin() + 1;
+        return index < labels.size() ? labels[index] : FlowchartLabel("#fail!");
     }
 
     [[nodiscard]] std::string to_string() const {
-        if (enableLogging) cout << "FlowchartProgram.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
         oss << "{";
         for (const auto &label: labels) {
             oss << blocks.at(label).to_string() << " ";
         }
         oss << "}";
-        if (enableLogging) cout << "FlowchartProgram.to_string: End: " << current_time() << endl;
         return oss.str();
     }
 
     [[nodiscard]] std::string pretty_print() const {
-        if (enableLogging) cout << "FlowchartProgram.to_string: Start: " << current_time() << endl;
         std::ostringstream oss;
         oss << "{\n";
         for (const auto &label: labels) {
             oss << blocks.at(label).pretty_print() << "\n\n";
         }
         oss << "}";
-
-        if (enableLogging) cout << "FlowchartProgram.to_string: End: " << current_time() << endl;
         return oss.str();
     }
 };
@@ -941,73 +858,74 @@ const T *const_as(const FlowchartValue &value) {
 }
 
 string value_to_string(optional<FlowchartValue> value) {
-    if (enableLogging) cout << "value_to_string: Start: " << current_time() << endl;
-    string result;
     if (value.has_value()) {
         if (const auto *stmt = as<Statement>(value.value())) {
-            result = stmt->to_string();
-        } else if (const auto *block = as<FlowchartBlock>(value.value())) {
-            result = block->to_string();
-        } else if (const auto *program = as<FlowchartProgram>(value.value())) {
-            result = program->to_string();
-        } else if (const auto *state = as<FlowchartProgramState>(value.value())) {
-            result = state->to_string();
-        } else if (const auto *list = as<FlowchartList>(value.value())) {
-            result = list->to_string();
-        } else if (const auto *tm_program = as<TuringMachineProgram>(value.value())) {
-            result = tm_program->to_string();
-        } else if (const auto *label = as<FlowchartLabel>(value.value())) {
-            result = label->value;
-        } else if (const auto *var = as<FlowchartVariable>(value.value())) {
-            result = var->name;
-        } else if (const auto *literal = as<FlowchartLiteral>(value.value())) {
-            result = literal->to_string();
-        } else {
-            throw std::runtime_error("Unexpected value");
+            return stmt->to_string();
         }
-    } else {
-        result = "None";
+        if (const auto *block = as<FlowchartBlock>(value.value())) {
+            return block->to_string();
+        }
+        if (const auto *program = as<FlowchartProgram>(value.value())) {
+            return program->to_string();
+        }
+        if (const auto *state = as<FlowchartProgramState>(value.value())) {
+            return state->to_string();
+        }
+        if (const auto *list = as<FlowchartList>(value.value())) {
+            return list->to_string();
+        }
+        if (const auto *tm_program = as<TuringMachineProgram>(value.value())) {
+            return tm_program->to_string();
+        }
+        if (const auto *label = as<FlowchartLabel>(value.value())) {
+            return label->value;
+        }
+        if (const auto *var = as<FlowchartVariable>(value.value())) {
+            return var->name;
+        }
+        if (const auto *literal = as<FlowchartLiteral>(value.value())) {
+            return literal->to_string();
+        }
+        throw std::runtime_error("Unexpected value");
     }
-
-    if (enableLogging) cout << "value_to_string: End: " << current_time() << endl;
-    return result;
+    return "None";
 }
 
 string pretty_print_value(optional<FlowchartValue> value) {
-    if (enableLogging) cout << "pretty_print_value: Start: " << current_time() << endl;
-    string result;
     if (value.has_value()) {
         if (const auto *stmt = as<Statement>(value.value())) {
-            result = stmt->pretty_print();
-        } else if (const auto *block = as<FlowchartBlock>(value.value())) {
-            result = block->pretty_print();
-        } else if (const auto *program = as<FlowchartProgram>(value.value())) {
-            result = program->pretty_print();
-        } else if (const auto *state = as<FlowchartProgramState>(value.value())) {
-            result = state->pretty_print();
-        } else if (const auto *list = as<FlowchartList>(value.value())) {
-            result = list->pretty_print();
-        } else if (const auto *tm_program = as<TuringMachineProgram>(value.value())) {
-            result = tm_program->pretty_print();
-        } else if (const auto *label = as<FlowchartLabel>(value.value())) {
-            result = label->value;
-        } else if (const auto *var = as<FlowchartVariable>(value.value())) {
-            result = var->name;
-        } else if (const auto *literal = as<FlowchartLiteral>(value.value())) {
-            result = literal->to_string();
-        } else {
-            throw std::runtime_error("Unexpected value");
+            return stmt->pretty_print();
         }
-    } else {
-        result = "None";
+        if (const auto *block = as<FlowchartBlock>(value.value())) {
+            return block->pretty_print();
+        }
+        if (const auto *program = as<FlowchartProgram>(value.value())) {
+            return program->pretty_print();
+        }
+        if (const auto *state = as<FlowchartProgramState>(value.value())) {
+            return state->pretty_print();
+        }
+        if (const auto *list = as<FlowchartList>(value.value())) {
+            return list->pretty_print();
+        }
+        if (const auto *tm_program = as<TuringMachineProgram>(value.value())) {
+            return tm_program->pretty_print();
+        }
+        if (const auto *label = as<FlowchartLabel>(value.value())) {
+            return label->value;
+        }
+        if (const auto *var = as<FlowchartVariable>(value.value())) {
+            return var->name;
+        }
+        if (const auto *literal = as<FlowchartLiteral>(value.value())) {
+            return literal->to_string();
+        }
+        throw std::runtime_error("Unexpected value");
     }
-
-    if (enableLogging) cout << "pretty_print_value: End: " << current_time() << endl;
-    return result;
+    return "None";
 }
 
 bool FlowchartProgramState::is_static(const FlowchartList &division, const string &expr) {
-    if (enableLogging) cout << "FlowchartProgramState.is_static: Start: " << current_time() << endl;
     auto tokens = Util::split_on_level(expr, ' ', 0);
     if (tokens.size() == 1) {
         bool found = false;
@@ -1018,69 +936,57 @@ bool FlowchartProgramState::is_static(const FlowchartList &division, const strin
             }
         }
         if (found) {
-            if (enableLogging) cout << "FlowchartProgramState.is_static: End: " << current_time() << endl;
             return true;
         }
         if (Util::is_correct_value(tokens[0]) && !FlowchartVariable::is_correct_string(tokens[0])) {
-            if (enableLogging) cout << "FlowchartProgramState.is_static: End: " << current_time() << endl;
             return true;
         }
-        if (enableLogging) cout << "FlowchartProgramState.is_static: End: " << current_time() << endl;
         return false;
     }
 
-    bool result = ranges::all_of(split_to_expr(vector(tokens.begin() + 1, tokens.end()), Util::functions[tokens[0]]),
-                                 [&](const string &s) { return is_static(division, s); });
-
-    if (enableLogging) cout << "FlowchartProgramState.is_static: End: " << current_time() << endl;
-    return result;
+    return ranges::all_of(split_to_expr(vector(tokens.begin() + 1, tokens.end()), Util::functions[tokens[0]]),
+                          [&](const string &s) { return is_static(division, s); });
 }
 
 optional<FlowchartValue>
 value_from_raw(const string &raw, optional<FlowchartProgramState> state, const bool is_reduce) {
-    if (enableLogging) cout << "value_from_raw(" << raw << "): Start: " << current_time() << endl;
     const string s = Util::strip_spaces(raw);
-    optional<FlowchartValue> result;
-    if (FlowchartList::is_correct_string(s)) result = FlowchartList(state, is_reduce, s, {});
-    else if (TuringMachineProgram::is_correct_string(s)) result = TuringMachineProgram(s, {}, {});
-    else if (FlowchartProgramState::is_correct_string(s)) result = FlowchartProgramState(state, is_reduce, s);
-    else if (FlowchartProgram::is_correct_string(s)) result = FlowchartProgram(state, is_reduce, s, "");
-    else if (FlowchartLiteral::is_correct_string(s)) result = FlowchartLiteral(s);
-    else if (FlowchartVariable::is_correct_string(s))
-        result = state.has_value()
-                     ? state.value().eval_expr(s, is_reduce).second
-                     : FlowchartVariable(s);
-    else if (FlowchartLabel::is_correct_string(s)) result = FlowchartLabel(s);
-    else throw std::runtime_error("FlowchartValue is not a FlowchartValue");
-    if (enableLogging) cout << "value_from_raw(" << raw << "): End: " << current_time() << endl;
-    return result;
+    if (FlowchartList::is_correct_string(s)) return FlowchartList(state, is_reduce, s, {});
+    if (TuringMachineProgram::is_correct_string(s)) return TuringMachineProgram(s, {}, {});
+    if (FlowchartProgramState::is_correct_string(s)) return FlowchartProgramState(state, is_reduce, s);
+    if (FlowchartProgram::is_correct_string(s)) return FlowchartProgram(state, is_reduce, s, "");
+    if (FlowchartLiteral::is_correct_string(s)) return FlowchartLiteral(s);
+    if (FlowchartVariable::is_correct_string(s))
+        return state.has_value()
+                   ? state.value().eval_expr(s, is_reduce).second
+                   : FlowchartVariable(s);
+    if (FlowchartLabel::is_correct_string(s)) return FlowchartLabel(s);
+    throw std::runtime_error("FlowchartValue is not a FlowchartValue");
 }
 
 class FlowchartInterpreter {
     FlowchartProgram program;
 
     optional<FlowchartLabel> execute_block(const FlowchartLabel &label) {
-        auto block = program.get_block(label);
+        const auto block = program.get_block(label);
         size_t i = 0;
 
         while (i < block.size()) {
             string stmt = block.get_line(i)->to_string();
-            if (enableLogging) cout << "stmt: " << stmt << ". Time: " << current_time() << endl;
-            auto tokens = Util::split_on_level(stmt, ' ', 0);
-            if (tokens[0] == ":=") {
+            if (auto tokens = Util::split_on_level(stmt, ' ', 0); tokens[0] == ":=") {
                 std::string expr = Util::join(2, tokens.size(), tokens, " ");
                 program.state.variables[FlowchartVariable(tokens[1])] = program.state.eval_expr(expr, false).second;
             } else if (tokens[0] == "goto") {
                 return FlowchartLabel(tokens[1]);
             } else if (tokens[0] == "if") {
-                auto result = program.state.eval_expr(Util::join(1, tokens.size() - 4, tokens, " "), false).second;
+                const auto result = program.state.eval_expr(Util::join(1, tokens.size() - 4, tokens, " "), false).
+                        second;
                 return const_as<FlowchartLiteral>(result.value())->value == "true"
                            ? FlowchartLabel(tokens[tokens.size() - 3])
                            : FlowchartLabel(tokens[tokens.size() - 1]);
             } else if (tokens[0] == "return") {
-                auto result = program.state.eval_expr(Util::join(1, tokens.size(), tokens, " "), false).second;
-                ofstream ofs("/Users/Timur.Kudashev/CLionProjects/FlowchartFutamura/output.txt");
-                ofs << "Returned:" << endl << pretty_print_value(result) << endl;
+                const auto result = program.state.eval_expr(Util::join(1, tokens.size(), tokens, " "), false).second;
+                cout << "Returned:" << endl << pretty_print_value(result) << endl;
                 return nullopt;
             } else {
                 throw std::runtime_error("Unexpected statement");
@@ -1091,14 +997,9 @@ class FlowchartInterpreter {
     }
 
     void run() {
-        int label_counter = 1;
         std::optional current_label = program.get_label(0);
         while (current_label.has_value()) {
             current_label = execute_block(current_label.value());
-            label_counter++;
-            if (label_counter % 1000 == 0) {
-                cout << label_counter << ": " << current_label.value_or(FlowchartLabel("the end")).value << endl;
-            }
         }
     }
 
@@ -1121,7 +1022,6 @@ public:
 
 FlowchartProgramState::FlowchartProgramState(const optional<FlowchartProgramState> &parent_state, const bool is_reduce,
                                              const string &s) {
-    if (enableLogging) cout << "FlowchartProgramState: Start: " << current_time() << endl;
     this->variables = {};
     if (!s.empty() && s != "[]") {
         const auto tmp = Util::split_on_level(s.substr(1, s.size() - 2), '$', 0);
@@ -1130,7 +1030,6 @@ FlowchartProgramState::FlowchartProgramState(const optional<FlowchartProgramStat
                 Util::strip_spaces(tmp[i + 1]), parent_state, is_reduce);
         }
     }
-    if (enableLogging) cout << "FlowchartProgramState: End: " << current_time() << endl;
 }
 
 bool FlowchartProgramState::is_empty() const {
@@ -1139,7 +1038,6 @@ bool FlowchartProgramState::is_empty() const {
 
 
 bool equal_values(const optional<FlowchartValue> &a, const optional<FlowchartValue> &b) {
-    if (enableLogging) cout << "equal_values: Start: " << current_time() << endl;
     bool result;
     if (a.has_value() != b.has_value()) result = false;
     else if (!a.has_value()) result = true;
@@ -1182,7 +1080,6 @@ bool equal_values(const optional<FlowchartValue> &a, const optional<FlowchartVal
     } else {
         throw runtime_error("FlowchartList::equal_values() failed");
     }
-    if (enableLogging) cout << "equal_values: End: " << current_time() << endl;
     return result;
 }
 
@@ -1203,22 +1100,15 @@ void FlowchartProgramState::append(const FlowchartVariable &name, const optional
 }
 
 optional<FlowchartValue> FlowchartProgramState::evaluate(const string &expr) {
-    if (enableLogging) cout << "FlowchartProgramState.evaluate: Start: " << current_time() << endl;
-    auto result = eval_expr(expr, false).second;
-    if (enableLogging) cout << "FlowchartProgramState.evaluate: End: " << current_time() << endl;
-    return result;
+    return eval_expr(expr, false).second;
 }
 
 optional<FlowchartValue> FlowchartProgramState::reduce(const string &expr) {
-    if (enableLogging) cout << "FlowchartProgramState.reduce: Start: " << current_time() << endl;
-    auto result = eval_expr(expr, true).second;
-    if (enableLogging) cout << "FlowchartProgramState.reduce: End: " << current_time() << endl;
-    return result;
+    return eval_expr(expr, true).second;
 }
 
 FlowchartList::FlowchartList(const std::optional<FlowchartProgramState> &state, bool isReduce, const std::string &s,
                              const optional<vector<optional<FlowchartValue> > > &values) {
-    if (enableLogging) cout << "FlowchartList: Start: " << current_time() << endl;
     if (values.has_value()) {
         this->values = values.value();
     } else if (s == "()" || s.empty()) {
@@ -1229,40 +1119,29 @@ FlowchartList::FlowchartList(const std::optional<FlowchartProgramState> &state, 
             this->values.emplace_back(value_from_raw(tokens[tokens.size() - 1 - i], state, isReduce));
         }
     }
-    if (enableLogging) cout << "FlowchartList: End: " << current_time() << endl;
 }
 
 FlowchartList::FlowchartList(const std::string &s,
                              const optional<std::vector<optional<FlowchartValue> > > &values) {
-    if (enableLogging) cout << "FlowchartList: Start: " << current_time() << endl;
     if (values.has_value()) {
         this->values = values.value();
     } else if (s == "()" || s.empty()) {
         this->values = {};
     }
-    if (enableLogging) cout << "FlowchartList: End: " << current_time() << endl;
 }
 
 [[nodiscard]] optional<FlowchartValue> FlowchartList::head() const {
-    if (enableLogging) cout << "FlowchartList.head: Start: " << current_time() << endl;
-    auto result = values.empty() ? nullopt : optional(values.back());
-    if (enableLogging) cout << "FlowchartList.head: End: " << current_time() << endl;
-    return result;
+    return values.empty() ? nullopt : optional(values.back());
 }
 
 [[nodiscard]] FlowchartList FlowchartList::tail() const {
-    if (enableLogging) cout << "FlowchartList.tail: Start: " << current_time() << endl;
-    auto result = values.size() < 2
-                      ? FlowchartList("", optional(vector<optional<FlowchartValue> >{}))
-                      : FlowchartList("", vector(values.begin(), values.end() - 1));
-    if (enableLogging) cout << "FlowchartList.tail: End: " << current_time() << endl;
-    return result;
+    return values.size() < 2
+               ? FlowchartList("", optional(vector<optional<FlowchartValue> >{}))
+               : FlowchartList("", vector(values.begin(), values.end() - 1));
 }
 
 void FlowchartList::cons(const optional<FlowchartValue> &elem) {
-    if (enableLogging) cout << "FlowchartList.cons: Start: " << current_time() << endl;
     values.emplace_back(elem);
-    if (enableLogging) cout << "FlowchartList.cons: End: " << current_time() << endl;
 }
 
 bool FlowchartList::is_empty() const {
@@ -1338,29 +1217,16 @@ bool equal_label_state(const FlowchartList &a, const FlowchartList &b, const Flo
 
 pair<bool, optional<FlowchartValue> >
 FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
-    if (enableLogging) cout << "FlowchartProgramState.eval_expr(" << expr << "): Start: " << current_time() << endl;
     auto tokens = Util::split_on_level(expr, ' ', 0);
     if (tokens.size() == 1) {
         if (FlowchartVariable::is_correct_string(tokens[0]) && variables.contains(FlowchartVariable(tokens[0]))) {
-            auto result = make_pair(true, variables.at(FlowchartVariable(tokens[0])));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, variables.at(FlowchartVariable(tokens[0])));
         }
         if (Util::is_correct_value(tokens[0]) && !FlowchartVariable::is_correct_string(tokens[0])) {
-            auto result = make_pair(true, value_from_raw(tokens[0], *this, is_reduce));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, value_from_raw(tokens[0], *this, is_reduce));
         }
         if (is_reduce && FlowchartVariable::is_correct_string(tokens[0])) {
-            auto result = make_pair(false, FlowchartVariable(expr));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(false, FlowchartVariable(expr));
         }
     }
 
@@ -1386,103 +1252,51 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             }
         }
         if (!success) {
-            auto result = make_pair(false, optional(FlowchartLiteral('%' + op + reduced + '/')));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(false, optional(FlowchartLiteral('%' + op + reduced + '/')));
         }
         if (op == "hd") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             if (auto *stmt = as<Statement>(values[0].value())) {
-                auto result = make_pair(true, optional(stmt->head()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(stmt->head()));
             }
             if (auto *list = as<FlowchartList>(values[0].value())) {
-                auto result = make_pair(true, list->head());
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, list->head());
             }
         } else if (op == "tl") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             if (auto *stmt = as<Statement>(values[0].value())) {
-                auto result = make_pair(true, optional(stmt->tail()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(stmt->tail()));
             }
             if (auto *list = as<FlowchartList>(values[0].value())) {
-                auto result = make_pair(true, optional(list->tail()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(list->tail()));
             }
             if (auto *block = as<FlowchartBlock>(values[0].value())) {
-                auto result = make_pair(true, optional(block->tail()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(block->tail()));
             }
         } else if (op == "cons") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             if (auto *stmt = as<Statement>(values[1].value())) {
                 stmt->cons(*as<FlowchartLiteral>(values[0].value()));
-                auto result = make_pair(true, optional(*stmt));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(*stmt));
             }
             if (auto *list = as<FlowchartList>(values[1].value())) {
                 list->cons(values[0].value());
-                auto result = make_pair(true, optional(*list));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(*list));
             }
         } else if (op == "==") {
-            auto result = make_pair(true, boolean_to_optional_value(equal_values(values[0], values[1])));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, boolean_to_optional_value(equal_values(values[0], values[1])));
         } else if (op == "newTail") {
             if (!values[0].has_value() || !values[1].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             auto *tm_program = as<TuringMachineProgram>(values[1].value());
@@ -1498,65 +1312,33 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             for (const auto &k: new_order) {
                 new_dictionary[k] = dictionary[k];
             }
-            auto result = make_pair(true, optional(TuringMachineProgram("", new_dictionary, new_order)));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(TuringMachineProgram("", new_dictionary, new_order)));
         } else if (op == "firstInstruction") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             auto *tm_program = as<TuringMachineProgram>(values[0].value());
             auto dictionary = tm_program->dictionary;
             auto order = tm_program->order;
-            auto result = make_pair(true, optional(dictionary[order[0]]));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(dictionary[order[0]]));
         } else if (op == "firstSym") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, optional(FlowchartLiteral("%/")));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(FlowchartLiteral("%/")));
             }
 
             auto *list = as<FlowchartList>(values[0].value());
-            auto result = make_pair(true, list->head());
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, list->head());
         } else if (op == "firstCommand") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             auto *block = as<FlowchartBlock>(values[0].value());
-            auto result = make_pair(true, block->get_line(0));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, block->get_line(0));
         } else if (op == "rest") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, nullopt);
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, nullopt);
             }
 
             auto *tm_program = as<TuringMachineProgram>(values[0].value());
@@ -1567,11 +1349,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             for (const auto &k: new_order) {
                 new_dictionary[k] = dictionary[k];
             }
-            auto result = make_pair(true, optional(TuringMachineProgram("", new_dictionary, new_order)));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(TuringMachineProgram("", new_dictionary, new_order)));
         } else if (op == "initialCode") {
             auto label = FlowchartLabel(string_from_literal_or_value(values[0]));
             auto state_str = value_to_string(
@@ -1581,13 +1359,9 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                                                ? label_renaming[label][state_str]
                                                : next_label_name();
             label_renaming[label][state_str] = renamed_label;
-            auto result = make_pair(true, FlowchartBlock(renamed_label));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, FlowchartBlock(renamed_label));
         } else if (op == "extendIf") {
-            FlowchartLabel true_label = FlowchartLabel(string_from_literal_or_value(values[2])),
+            auto true_label = FlowchartLabel(string_from_literal_or_value(values[2])),
                     false_label = FlowchartLabel(string_from_literal_or_value(values[3]));
             string compressed_true_state = value_to_string(
                         const_as<FlowchartProgramState>(values[4].value())->compress(
@@ -1611,157 +1385,76 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             updated.add_line(Statement(
                 {}, "if " + string_from_literal_or_value(values[1]) + " goto " + renamed_true_label.value + " else " +
                     renamed_false_label.value, false, true));
-            auto result = make_pair(true, updated);
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, updated);
         } else if (op == "extendReturn") {
             auto updated = *as<FlowchartBlock>(values[0].value());
             updated.add_line(Statement({}, "return " + string_from_literal_or_value(values[1]), false, true));
-            auto result = make_pair(true, updated);
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, updated);
         } else if (op == "extendAssignment") {
             auto updated = *as<FlowchartBlock>(values[0].value());
             updated.add_line(Statement(
                 {}, ":= " + string_from_literal_or_value(values[1]) + " " + string_from_literal_or_value(values[2]),
                 false, true));
-            auto result = make_pair(true, updated);
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, updated);
         } else if (op == "extendCode") {
             as<FlowchartProgram>(values[0].value())->add_block(*const_as<FlowchartBlock>(values[1].value()));
-            auto result = make_pair(true, *as<FlowchartProgram>(values[0].value()));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, *as<FlowchartProgram>(values[0].value()));
         } else if (op == "eval") {
             auto *program_state = as<FlowchartProgramState>(values[1].value());
-            auto result = make_pair(true, program_state->evaluate(as<FlowchartLiteral>(values[0].value())->value));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, program_state->evaluate(as<FlowchartLiteral>(values[0].value())->value));
         } else if (op == "reduce") {
             auto *program_state = as<FlowchartProgramState>(values[1].value());
-            auto result = make_pair(true, program_state->reduce(as<FlowchartLiteral>(values[0].value())->value));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, program_state->reduce(as<FlowchartLiteral>(values[0].value())->value));
         } else if (op == "addToState") {
             auto *program_state = as<FlowchartProgramState>(values[0].value());
             auto var = FlowchartVariable(as<FlowchartLiteral>(values[1].value())->value);
             program_state->append(var, values[2]);
-            auto result = make_pair(true, optional(*program_state));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(*program_state));
         } else if (op == "isStatic") {
-            auto result = make_pair(true, boolean_to_optional_value(
-                                        is_static(*as<FlowchartList>(values[0].value()),
-                                                  as<FlowchartLiteral>(values[1].value())->value)));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, boolean_to_optional_value(
+                                 is_static(*as<FlowchartList>(values[0].value()),
+                                           as<FlowchartLiteral>(values[1].value())->value)));
         } else if (op == "lookup") {
             auto *program = as<FlowchartProgram>(values[1].value());
             auto label = FlowchartLabel(string_from_literal_or_value(values[0]));
-            auto result = make_pair(true, optional(program->get_block(label)));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(program->get_block(label)));
         } else if (op == "in") {
-            auto *list = as<FlowchartList>(values[1].value());
-            for (optional<FlowchartValue> &v: list->values) {
+            for (auto *list = as<FlowchartList>(values[1].value()); optional<FlowchartValue> &v: list->values) {
                 if (equal_values(v, values[0])) {
-                    auto result = make_pair(true, boolean_to_optional_value(true));
-                    if (enableLogging)
-                        cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
-                                current_time() << endl;
-                    return result;
+                    return make_pair(true, boolean_to_optional_value(true));
                 }
             }
-            auto result = make_pair(true, boolean_to_optional_value(false));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, boolean_to_optional_value(false));
         } else if (op == "lookupInitial") {
             auto *program = as<FlowchartProgram>(values[0].value());
-            auto result = make_pair(true, optional(program->labels[0]));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(program->labels[0]));
         } else if (op == "isEmpty") {
             if (!values[0].has_value()) {
-                auto result = make_pair(true, boolean_to_optional_value(true));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, boolean_to_optional_value(true));
             }
             if (auto *tm_program = as<TuringMachineProgram>(values[0].value())) {
-                auto result = make_pair(true, boolean_to_optional_value(tm_program->is_empty()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, boolean_to_optional_value(tm_program->is_empty()));
             }
             if (auto *block = as<FlowchartBlock>(values[0].value())) {
-                auto result = make_pair(true, boolean_to_optional_value(block->size() == 0));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, boolean_to_optional_value(block->size() == 0));
             }
             if (auto *list = as<FlowchartList>(values[0].value())) {
-                auto result = make_pair(true, boolean_to_optional_value(list->is_empty()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, boolean_to_optional_value(list->is_empty()));
             }
             if (auto *state = as<FlowchartProgramState>(values[0].value())) {
-                auto result = make_pair(true, boolean_to_optional_value(state->is_empty()));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, boolean_to_optional_value(state->is_empty()));
             }
         } else if (op == "nextLabel") {
             auto *program = as<FlowchartProgram>(values[1].value());
             auto *pendingLabels = as<FlowchartList>(values[2].value());
-            auto result = make_pair(true, program->next_label(*as<FlowchartLabel>(values[0].value()), *pendingLabels));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, program->next_label(*as<FlowchartLabel>(values[0].value()), *pendingLabels));
         } else if (op == "getLabel") {
             auto *program = as<FlowchartProgram>(values[1].value());
-            auto result = make_pair(true, program->get_label(stoi(as<FlowchartLiteral>(values[0].value())->value)));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, program->get_label(stoi(as<FlowchartLiteral>(values[0].value())->value)));
         } else if (op == "hasNext") {
             auto *program = as<FlowchartProgram>(values[1].value());
-            auto result = make_pair(
+            return make_pair(
                 true, boolean_to_optional_value(program->has_next(*as<FlowchartLabel>(values[0].value()))));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
         } else if (op == "consUniqueIfNotInWithStateCompression") {
             if (values[1].has_value()) {
                 auto *list = as<FlowchartList>(values[1].value());
@@ -1769,11 +1462,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                     if (equal_label_state(*const_as<FlowchartList>(v.value()),
                                           *const_as<FlowchartList>(values[0].value()),
                                           *const_as<FlowchartList>(values[3].value()))) {
-                        auto result = make_pair(true, values[1]);
-                        if (enableLogging)
-                            cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
-                                    current_time() << endl;
-                        return result;
+                        return make_pair(true, values[1]);
                     }
                 }
             }
@@ -1783,11 +1472,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                     if (equal_label_state(*const_as<FlowchartList>(v.value()),
                                           *const_as<FlowchartList>(values[0].value()),
                                           *const_as<FlowchartList>(values[3].value()))) {
-                        auto result = make_pair(true, values[1]);
-                        if (enableLogging)
-                            cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
-                                    current_time() << endl;
-                        return result;
+                        return make_pair(true, values[1]);
                     }
                 }
             }
@@ -1795,11 +1480,7 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                 as<FlowchartList>(values[0].value())->values[1] = FlowchartLabel(
                     string_from_literal_or_value(as<FlowchartList>(values[0].value())->values[1]));
                 list->cons(values[0]);
-                auto result = make_pair(true, optional(*list));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(*list));
             }
         } else if (op == "consUnique") {
             auto incoming_label = FlowchartLabel(string_from_literal_or_value(values[0]));
@@ -1807,28 +1488,16 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
                 auto *list = as<FlowchartList>(values[1].value());
                 for (auto &v: list->values) {
                     if (equal_values(FlowchartLabel(string_from_literal_or_value(v)), incoming_label)) {
-                        auto result = make_pair(true, values[1]);
-                        if (enableLogging)
-                            cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " <<
-                                    current_time() << endl;
-                        return result;
+                        return make_pair(true, values[1]);
                     }
                 }
             }
             if (auto *list = as<FlowchartList>(values[1].value())) {
                 list->cons(incoming_label);
-                auto result = make_pair(true, optional(*list));
-                if (enableLogging)
-                    cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                            endl;
-                return result;
+                return make_pair(true, optional(*list));
             }
         } else if (op == "usedVars") {
-            auto result = make_pair(true, optional(as<FlowchartProgram>(values[0].value())->get_used_vars()));
-            if (enableLogging)
-                cout << "FlowchartProgramState.eval_expr(" << expr << "): End: " << current_time() <<
-                        endl;
-            return result;
+            return make_pair(true, optional(as<FlowchartProgram>(values[0].value())->get_used_vars()));
         }
     }
     throw std::runtime_error("Invalid expression");
@@ -1851,7 +1520,6 @@ bool Util::is_correct_value(const string &s) {
            FlowchartProgramState::is_correct_string(s) ||
            TuringMachineProgram::is_correct_string(s);
 }
-
 
 int main() {
     string input;
