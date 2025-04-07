@@ -753,17 +753,19 @@ public:
                 if (line.rfind(" parse ") != string::npos) {
                     auto args = Util::split_on_level(Util::strip_spaces(line), ' ', 0);
                     const auto &parsed_program_arg = FlowchartVariable(args[1]);
-                    auto program_arg = as<FlowchartProgram>(result.state.variables[FlowchartVariable(args[3])].value());
                     const auto &vs_arg = FlowchartVariable(args[4]);
-                    if (result.state.variables.contains(vs_arg)) {
-                        if (!result.state.variables[vs_arg].has_value())
-                            result.state.variables[parsed_program_arg] = program_arg->
-                                    parse_program(false, nullopt, ifs);
-                        else
-                            result.state.variables[parsed_program_arg] = program_arg->parse_program(
-                                false, *as<FlowchartProgramState>(result.state.variables[vs_arg].value()), ifs);
-                    } else
-                        result.state.variables[parsed_program_arg] = program_arg->parse_program(false, nullopt, ifs);
+                    if (result.state.variables[FlowchartVariable(args[3])].has_value()) {
+                        auto program_arg = as<FlowchartProgram>(result.state.variables[FlowchartVariable(args[3])].value());
+                        if (result.state.variables.contains(vs_arg)) {
+                            if (!result.state.variables[vs_arg].has_value())
+                                result.state.variables[parsed_program_arg] = program_arg->
+                                        parse_program(false, nullopt, ifs);
+                            else
+                                result.state.variables[parsed_program_arg] = program_arg->parse_program(
+                                    false, *as<FlowchartProgramState>(result.state.variables[vs_arg].value()), ifs);
+                        } else
+                            result.state.variables[parsed_program_arg] = program_arg->parse_program(false, nullopt, ifs);
+                    }
                     if (result.state.variables.contains(vs_arg) && result.state.variables[vs_arg].has_value() && as<
                             FlowchartProgramState>(result.state.variables[vs_arg].value())->variables.contains(
                             parsed_program_arg))
@@ -823,7 +825,7 @@ public:
     FlowchartLabel next_label(const FlowchartLabel &label, const FlowchartList &list) {
         auto index = ranges::find(labels, label) - labels.begin() + 1;
         while (index < labels.size()) {
-            for (auto &l : list.values) {
+            for (auto &l: list.values) {
                 if (auto cur = *const_as<FlowchartLabel>(l.value()); cur.value == labels[index].value) {
                     return cur;
                 }
@@ -1453,7 +1455,8 @@ FlowchartProgramState::eval_expr(const string &expr, bool is_reduce) {
             }
         } else if (op == "nextLabel") {
             auto *program = as<FlowchartProgram>(values[1].value());
-            return make_pair(true, program->next_label(*as<FlowchartLabel>(values[0].value()), *as<FlowchartList>(values[2].value())));
+            return make_pair(true, program->next_label(*as<FlowchartLabel>(values[0].value()),
+                                                       *as<FlowchartList>(values[2].value())));
         } else if (op == "getLabel") {
             auto *program = as<FlowchartProgram>(values[1].value());
             return make_pair(true, program->get_label(stoi(as<FlowchartLiteral>(values[0].value())->value)));
