@@ -20,4 +20,4 @@ Modifications of a language:
 4. Program state: `[a $ %1/ $ b $ %2/]`. `$` as a separator, state is in square braces. Should be: name, value, name, value ...
 5. Flowchart program should start with `{` and end with `}`
 6. Turing machine program should start with `<` and end with `>`
-7. `:=` is an assignment operator and should be at the beginning of the line: `:= x %5/`
+7. `:=` is an assignment operator and should be at the beginning of the line: `:= x %5/;`
