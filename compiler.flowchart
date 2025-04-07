@@ -13,72 +13,20 @@ read vs0;
 
 
 #lab2!:
-    if == #loop! pp goto #lab3! else #lab4! ;
+    if == #fail! pp goto #lab3! else #lab4! ;
 
 
 #lab4!:
-    if == #cont! pp goto #lab5! else #lab6! ;
+    if == #fail! pp goto #lab3! else #lab4! ;
+
+
+#lab3!:
+    := code extendReturn code reduce %fail/ vs ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab6! ;
 
 
 #lab6!:
-    if == #cont1! pp goto #lab7! else #lab8! ;
-
-
-#lab8!:
-    if == #cont2! pp goto #lab9! else #lab10! ;
-
-
-#lab10!:
-    if == #cont3! pp goto #lab11! else #lab12! ;
-
-
-#lab12!:
-    if == #cont4! pp goto #lab13! else #lab14! ;
-
-
-#lab14!:
-    if == #do_right! pp goto #lab15! else #lab16! ;
-
-
-#lab16!:
-    if == #do_left! pp goto #lab17! else #lab18! ;
-
-
-#lab18!:
-    if == #do_write! pp goto #lab19! else #lab20! ;
-
-
-#lab20!:
-    if == #do_goto! pp goto #lab21! else #lab22! ;
-
-
-#lab22!:
-    if == #do_if! pp goto #lab23! else #lab24! ;
-
-
-#lab24!:
-    if == #jump! pp goto #lab25! else #lab26! ;
-
-
-#lab26!:
-    if == #fail! pp goto #lab27! else #lab28! ;
-
-
-#lab28!:
-    if == #stop! pp goto #lab29! else #lab30! ;
-
-
-#lab30!:
-    if == #fail! pp goto #lab27! else #lab28! ;
-
-
-#lab29!:
-    := code extendReturn code reduce %Right/ vs ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab31! else #lab32! ;
-
-
-#lab32!:
     := pp hd hd pending ;
     := vs hd tl hd pending ;
     := marked cons (pp $ vs) marked ;
@@ -87,151 +35,115 @@ read vs0;
     if == #init! pp goto #lab1! else #lab2! ;
 
 
-#lab31!:
-    return residual ;
-
-
-#lab27!:
-    := code extendReturn code reduce %fail/ vs ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab31! else #lab32! ;
-
-
-#lab25!:
-    := vs addToState vs %Qtail/ eval %newTail Nextlabel Q/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab34!:
-    := vs addToState vs %Instruction/ eval %firstInstruction Qtail/ vs ;
-    := vs addToState vs %Qtail/ eval %rest Qtail/ vs ;
-    := vs addToState vs %Operator/ eval %hd Instruction/ vs ;
-    if eval %== Operator %right// vs goto #lab35! else #lab36! ;
-
-
-#lab36!:
-    if eval %== Operator %left// vs goto #lab37! else #lab38! ;
-
-
-#lab38!:
-    if eval %== Operator %write// vs goto #lab39! else #lab40! ;
-
-
-#lab40!:
-    if eval %== Operator %goto// vs goto #lab41! else #lab42! ;
-
-
-#lab42!:
-    if eval %== Operator %if// vs goto #lab43! else #lab44! ;
-
-
-#lab44!:
-    := code extendReturn code reduce %fail/ vs ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab31! else #lab32! ;
-
-
-#lab43!:
-    := vs addToState vs %Symbol/ eval %hd tl Instruction/ vs ;
-    := vs addToState vs %Nextlabel/ eval %hd tl tl tl Instruction/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#jump!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#loop!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
-    := code extendIf code reduce %== Symbol firstSym Right/ vs %#jump!/ %#loop!/ vs (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab31! else #lab32! ;
-
-
-#lab41!:
-    := vs addToState vs %Qtail/ eval %newTail hd tl Instruction Q/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab39!:
-    := code extendAssignment code %Right/ reduce %cons hd tl Instruction tl Right/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab37!:
-    := code extendAssignment code %Right/ reduce %cons firstSym Left Right/ vs ;
-    := code extendAssignment code %Left/ reduce %tl Left/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab35!:
-    := code extendAssignment code %Left/ reduce %cons firstSym Right Left/ vs ;
-    := code extendAssignment code %Right/ reduce %tl Right/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab33!:
-    := code extendReturn code reduce %Right/ vs ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab31! else #lab32! ;
-
-
-#lab23!:
-    := vs addToState vs %Symbol/ eval %hd tl Instruction/ vs ;
-    := vs addToState vs %Nextlabel/ eval %hd tl tl tl Instruction/ vs ;
-    := pending consUniqueIfNotInWithStateCompression (%#jump!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
-    := pending consUniqueIfNotInWithStateCompression (%#loop!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
-    := code extendIf code reduce %== Symbol firstSym Right/ vs %#jump!/ %#loop!/ vs (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
-    := residual extendCode residual code ;
-    if isEmpty pending goto #lab31! else #lab32! ;
-
-
-#lab21!:
-    := vs addToState vs %Qtail/ eval %newTail hd tl Instruction Q/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab19!:
-    := code extendAssignment code %Right/ reduce %cons hd tl Instruction tl Right/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab17!:
-    := code extendAssignment code %Right/ reduce %cons firstSym Left Right/ vs ;
-    := code extendAssignment code %Left/ reduce %tl Left/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab15!:
-    := code extendAssignment code %Left/ reduce %cons firstSym Right Left/ vs ;
-    := code extendAssignment code %Right/ reduce %tl Right/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
-
-
-#lab13!:
-    if eval %== Operator %if// vs goto #lab43! else #lab44! ;
-
-
-#lab11!:
-    if eval %== Operator %goto// vs goto #lab41! else #lab42! ;
-
-
-#lab9!:
-    if eval %== Operator %write// vs goto #lab39! else #lab40! ;
-
-
-#lab7!:
-    if eval %== Operator %left// vs goto #lab37! else #lab38! ;
-
-
 #lab5!:
-    := vs addToState vs %Instruction/ eval %firstInstruction Qtail/ vs ;
-    := vs addToState vs %Qtail/ eval %rest Qtail/ vs ;
-    := vs addToState vs %Operator/ eval %hd Instruction/ vs ;
-    if eval %== Operator %right// vs goto #lab35! else #lab36! ;
-
-
-#lab3!:
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
+    return residual ;
 
 
 #lab1!:
     := vs addToState vs %Qtail/ eval %Q/ vs ;
     := code extendAssignment code %Left/ reduce %()/ vs ;
-    if eval %== Qtail <>/ vs goto #lab33! else #lab34! ;
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab8!:
+    := vs addToState vs %Instruction/ eval %firstInstruction Qtail/ vs ;
+    := vs addToState vs %Qtail/ eval %rest Qtail/ vs ;
+    := vs addToState vs %Operator/ eval %hd Instruction/ vs ;
+    if eval %== Operator %right// vs goto #lab9! else #lab10! ;
+
+
+#lab10!:
+    if eval %== Operator %left// vs goto #lab11! else #lab12! ;
+
+
+#lab12!:
+    if eval %== Operator %write// vs goto #lab13! else #lab14! ;
+
+
+#lab14!:
+    if eval %== Operator %goto// vs goto #lab15! else #lab16! ;
+
+
+#lab16!:
+    if eval %== Operator %if// vs goto #lab17! else #lab18! ;
+
+
+#lab18!:
+    := code extendReturn code reduce %fail/ vs ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab6! ;
+
+
+#lab17!:
+    := vs addToState vs %Symbol/ eval %hd tl Instruction/ vs ;
+    := vs addToState vs %Nextlabel/ eval %hd tl tl tl Instruction/ vs ;
+    := pending consUniqueIfNotInWithStateCompression (%#jump!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := pending consUniqueIfNotInWithStateCompression (%#loop!/ $ vs) pending marked (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := code extendIf code reduce %== Symbol firstSym Right/ vs %#jump!/ %#loop!/ vs (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab19! ;
+
+
+#lab19!:
+    := pp hd hd pending ;
+    := vs hd tl hd pending ;
+    := marked cons (pp $ vs) marked ;
+    := code initialCode pp vs (((%Right/) $ #stop!) $ (() $ #fail!) $ ((%Q/ $ %Nextlabel/) $ #jump!) $ ((%Right/ $ %Instruction/ $ %Instruction/) $ #do_if!) $ ((%Q/ $ %Instruction/) $ #do_goto!) $ ((%Right/ $ %Instruction/) $ #do_write!) $ ((%Left/ $ %Right/ $ %Left/) $ #do_left!) $ ((%Right/ $ %Left/ $ %Right/) $ #do_right!) $ ((%Operator/) $ #cont4!) $ ((%Operator/) $ #cont3!) $ ((%Operator/) $ #cont2!) $ ((%Operator/) $ #cont1!) $ ((%Qtail/ $ %Qtail/) $ #cont!) $ ((%Qtail/) $ #loop!) $ ((%Q/) $ #init!)) ;
+    := pending tl pending ;
+    if == #init! pp goto #lab1! else #lab20! ;
+
+
+#lab20!:
+    if == #loop! pp goto #lab21! else #lab22! ;
+
+
+#lab22!:
+    if == #jump! pp goto #lab23! else #lab24! ;
+
+
+#lab24!:
+    if == #fail! pp goto #lab3! else #lab25! ;
+
+
+#lab25!:
+    if == #fail! pp goto #lab3! else #lab25! ;
+
+
+#lab23!:
+    := vs addToState vs %Qtail/ eval %newTail Nextlabel Q/ vs ;
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab21!:
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab15!:
+    := vs addToState vs %Qtail/ eval %newTail hd tl Instruction Q/ vs ;
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab13!:
+    := code extendAssignment code %Right/ reduce %cons hd tl Instruction tl Right/ vs ;
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab11!:
+    := code extendAssignment code %Right/ reduce %cons firstSym Left Right/ vs ;
+    := code extendAssignment code %Left/ reduce %tl Left/ vs ;
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab9!:
+    := code extendAssignment code %Left/ reduce %cons firstSym Right Left/ vs ;
+    := code extendAssignment code %Right/ reduce %tl Right/ vs ;
+    if eval %== Qtail <>/ vs goto #lab7! else #lab8! ;
+
+
+#lab7!:
+    := code extendReturn code reduce %Right/ vs ;
+    := residual extendCode residual code ;
+    if isEmpty pending goto #lab5! else #lab6! ;
 
 
 }
